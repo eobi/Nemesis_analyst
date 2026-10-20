@@ -1,0 +1,26 @@
+# --- SECURITY: never publish malware, analysis output, or secrets ---
+samples/
+cases/
+*.bin
+*.dmp
+unpacked*.exe
+*_unpacked*
+
+# credentials / local config
+targets.json
+.env
+.mcp.json
+
+# large / vendored tooling (install separately — see README)
+vendor/
+tools-cache/
+out/
+data/cache/
+
+# python / os
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.venv/
+venv/

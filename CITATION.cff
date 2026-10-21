@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: Nemesis Analyst
+message: "If you use this software, please cite it."
+type: software
+authors:
+  - family-names: Obi
+    given-names: Ebuka David
+repository-code: "https://github.com/eobi/Nemesis_analyst"
+abstract: >-
+  AI-assisted malware unpacking and analysis. Runs a packed Windows sample under
+  a debugger inside a disposable VM over SSH, captures the unpacked payload,
+  recovers encryption keys, classifies the malware family, and exports a
+  detection package (YARA, Sigma, Suricata, STIX, IOCs). Driveable from any LLM
+  via the Model Context Protocol.
+keywords:
+  - malware analysis
+  - reverse engineering
+  - unpacking
+  - dynamic analysis
+  - x64dbg
+  - threat intelligence
+  - model context protocol
+license: MIT
+version: 1.0.0

@@ -161,3 +161,7 @@ DETONATION_RUNBOOK.md the detonation sequence in detail
 ## License
 
 MIT. Use it on samples you are allowed to analyse, in a VM you can throw away.
+
+---
+
+Created and maintained by **Obi Ebuka David**. Contributions welcome.

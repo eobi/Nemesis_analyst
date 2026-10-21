@@ -1,0 +1,228 @@
+{
+    "type": "bundle",
+    "id": "bundle--059c6890-4e84-485f-9163-188cda3ffa58",
+    "objects": [
+        {
+            "type": "identity",
+            "spec_version": "2.1",
+            "id": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.90668Z",
+            "modified": "2026-10-21T21:28:23.90668Z",
+            "name": "Nemesis Labs",
+            "identity_class": "organization"
+        },
+        {
+            "type": "marking-definition",
+            "spec_version": "2.1",
+            "id": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
+            "created": "2017-01-20T00:00:00.000Z",
+            "definition_type": "tlp",
+            "name": "TLP:AMBER",
+            "definition": {
+                "tlp": "amber"
+            }
+        },
+        {
+            "type": "malware",
+            "spec_version": "2.1",
+            "id": "malware--2de87467-529e-569c-bea3-37f215354c39",
+            "created_by_ref": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.906822Z",
+            "modified": "2026-10-21T21:28:23.906822Z",
+            "name": "loader/packer",
+            "malware_types": [
+                "trojan"
+            ],
+            "is_family": false,
+            "object_marking_refs": [
+                "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82"
+            ]
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--c24ad892-63aa-57c3-9175-8c44c3c4083d",
+            "created_by_ref": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.90717Z",
+            "modified": "2026-10-21T21:28:23.90717Z",
+            "name": "file:md5: 691ceb869f2c5120a139d766242ec0f4",
+            "description": "Tier: observed. Sources: unpacked dump: api_ntwx_0x10001000.bin; unpacked dump: api_wx_0x10001000.bin",
+            "indicator_types": [
+                "malicious-activity"
+            ],
+            "pattern": "[file:hashes.MD5 = '691ceb869f2c5120a139d766242ec0f4']",
+            "pattern_type": "stix",
+            "object_marking_refs": [
+                "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82"
+            ],
+            "pattern_version": "2.1",
+            "valid_from": "2026-10-21T21:28:23Z",
+            "confidence": 90
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--1c44f6cf-a807-573e-9371-5cbc7af7af40",
+            "created": "2026-10-21T21:28:23.910694Z",
+            "modified": "2026-10-21T21:28:23.910694Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--c24ad892-63aa-57c3-9175-8c44c3c4083d",
+            "target_ref": "malware--2de87467-529e-569c-bea3-37f215354c39"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--5f42ca64-a974-5b5d-9376-00233995357d",
+            "created_by_ref": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.910804Z",
+            "modified": "2026-10-21T21:28:23.910804Z",
+            "name": "file:md5: 6a8401448a5bd2b540850f811b20a66d",
+            "description": "Tier: observed. Sources: sample",
+            "indicator_types": [
+                "malicious-activity"
+            ],
+            "pattern": "[file:hashes.MD5 = '6a8401448a5bd2b540850f811b20a66d']",
+            "pattern_type": "stix",
+            "object_marking_refs": [
+                "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82"
+            ],
+            "pattern_version": "2.1",
+            "valid_from": "2026-10-21T21:28:23Z",
+            "confidence": 90
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--eb6e1745-da2b-5fb9-9ac7-6cb56b9c7833",
+            "created": "2026-10-21T21:28:23.911142Z",
+            "modified": "2026-10-21T21:28:23.911142Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--5f42ca64-a974-5b5d-9376-00233995357d",
+            "target_ref": "malware--2de87467-529e-569c-bea3-37f215354c39"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--e529462d-531e-5782-a516-28caa9770a2f",
+            "created_by_ref": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.911232Z",
+            "modified": "2026-10-21T21:28:23.911232Z",
+            "name": "file:sha1: 8192eb2fbc7c46b061e9906714eab38426782026",
+            "description": "Tier: observed. Sources: unpacked dump: api_ntwx_0x10001000.bin; unpacked dump: api_wx_0x10001000.bin",
+            "indicator_types": [
+                "malicious-activity"
+            ],
+            "pattern": "[file:hashes.'SHA-1' = '8192eb2fbc7c46b061e9906714eab38426782026']",
+            "pattern_type": "stix",
+            "object_marking_refs": [
+                "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82"
+            ],
+            "pattern_version": "2.1",
+            "valid_from": "2026-10-21T21:28:23Z",
+            "confidence": 90
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--17e41b9d-cb4b-50cd-bdf2-778f5bd0e7b4",
+            "created": "2026-10-21T21:28:23.91186Z",
+            "modified": "2026-10-21T21:28:23.91186Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--e529462d-531e-5782-a516-28caa9770a2f",
+            "target_ref": "malware--2de87467-529e-569c-bea3-37f215354c39"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--12c0b68a-af33-56c0-ba5b-7919f3faade5",
+            "created_by_ref": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.91195Z",
+            "modified": "2026-10-21T21:28:23.91195Z",
+            "name": "file:sha1: 9f01d4442c495c7128649b98201187bc0c58dedd",
+            "description": "Tier: observed. Sources: sample",
+            "indicator_types": [
+                "malicious-activity"
+            ],
+            "pattern": "[file:hashes.'SHA-1' = '9f01d4442c495c7128649b98201187bc0c58dedd']",
+            "pattern_type": "stix",
+            "object_marking_refs": [
+                "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82"
+            ],
+            "pattern_version": "2.1",
+            "valid_from": "2026-10-21T21:28:23Z",
+            "confidence": 90
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--56443c56-fbbb-5f9e-b761-1e41178c2080",
+            "created": "2026-10-21T21:28:23.912268Z",
+            "modified": "2026-10-21T21:28:23.912268Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--12c0b68a-af33-56c0-ba5b-7919f3faade5",
+            "target_ref": "malware--2de87467-529e-569c-bea3-37f215354c39"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--5bb8a13d-93ba-50e5-9335-5e28ac5e8c3a",
+            "created_by_ref": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.912347Z",
+            "modified": "2026-10-21T21:28:23.912347Z",
+            "name": "file:sha256: 178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1",
+            "description": "Tier: observed. Sources: sample",
+            "indicator_types": [
+                "malicious-activity"
+            ],
+            "pattern": "[file:hashes.'SHA-256' = '178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1']",
+            "pattern_type": "stix",
+            "object_marking_refs": [
+                "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82"
+            ],
+            "pattern_version": "2.1",
+            "valid_from": "2026-10-21T21:28:23Z",
+            "confidence": 90
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--11b48392-3c24-51cf-9e1f-78324327c0bc",
+            "created": "2026-10-21T21:28:23.912778Z",
+            "modified": "2026-10-21T21:28:23.912778Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--5bb8a13d-93ba-50e5-9335-5e28ac5e8c3a",
+            "target_ref": "malware--2de87467-529e-569c-bea3-37f215354c39"
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--de284865-4935-56fb-8e9b-9f63e81c6a6f",
+            "created_by_ref": "identity--be212011-ffd9-57f6-9cd4-2b206d6bb7d9",
+            "created": "2026-10-21T21:28:23.912858Z",
+            "modified": "2026-10-21T21:28:23.912858Z",
+            "name": "file:sha256: e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de",
+            "description": "Tier: observed. Sources: unpacked dump: api_ntwx_0x10001000.bin; unpacked dump: api_wx_0x10001000.bin",
+            "indicator_types": [
+                "malicious-activity"
+            ],
+            "pattern": "[file:hashes.'SHA-256' = 'e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de']",
+            "pattern_type": "stix",
+            "object_marking_refs": [
+                "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82"
+            ],
+            "pattern_version": "2.1",
+            "valid_from": "2026-10-21T21:28:23Z",
+            "confidence": 90
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--bf17675c-8d52-539a-bb01-0466808af46c",
+            "created": "2026-10-21T21:28:23.913178Z",
+            "modified": "2026-10-21T21:28:23.913178Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--de284865-4935-56fb-8e9b-9f63e81c6a6f",
+            "target_ref": "malware--2de87467-529e-569c-bea3-37f215354c39"
+        }
+    ]
+}

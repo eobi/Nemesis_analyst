@@ -1,0 +1,427 @@
+{
+  "schema": "nemesis-analyst/iocs/1",
+  "producer": "Nemesis Labs",
+  "tlp": "AMBER",
+  "generated": "2026-10-21T21:28:23Z",
+  "sample": {
+    "name": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+    "sha256": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1",
+    "size": 212992
+  },
+  "family": "loader/packer",
+  "categories": [
+    "loader/packer"
+  ],
+  "indicators": [
+    {
+      "type": "file:imphash",
+      "value": "7ebef1081a372c6e6f289d7c633f4f3a",
+      "usage": "block",
+      "tier": "observed",
+      "confidence": 90,
+      "sources": [
+        "sample"
+      ],
+      "context": "sample (as submitted)"
+    },
+    {
+      "type": "file:md5",
+      "value": "691ceb869f2c5120a139d766242ec0f4",
+      "usage": "block",
+      "tier": "observed",
+      "confidence": 90,
+      "sources": [
+        "unpacked dump: api_ntwx_0x10001000.bin",
+        "unpacked dump: api_wx_0x10001000.bin"
+      ],
+      "context": "W->X region = DECRYPTED PAYLOAD (made executable)"
+    },
+    {
+      "type": "file:md5",
+      "value": "6a8401448a5bd2b540850f811b20a66d",
+      "usage": "block",
+      "tier": "observed",
+      "confidence": 90,
+      "sources": [
+        "sample"
+      ],
+      "context": "sample (as submitted)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "8192eb2fbc7c46b061e9906714eab38426782026",
+      "usage": "block",
+      "tier": "observed",
+      "confidence": 90,
+      "sources": [
+        "unpacked dump: api_ntwx_0x10001000.bin",
+        "unpacked dump: api_wx_0x10001000.bin"
+      ],
+      "context": "W->X region = DECRYPTED PAYLOAD (made executable)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "9f01d4442c495c7128649b98201187bc0c58dedd",
+      "usage": "block",
+      "tier": "observed",
+      "confidence": 90,
+      "sources": [
+        "sample"
+      ],
+      "context": "sample (as submitted)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1",
+      "usage": "block",
+      "tier": "observed",
+      "confidence": 90,
+      "sources": [
+        "sample"
+      ],
+      "context": "sample (as submitted)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de",
+      "usage": "block",
+      "tier": "observed",
+      "confidence": 90,
+      "sources": [
+        "unpacked dump: api_ntwx_0x10001000.bin",
+        "unpacked dump: api_wx_0x10001000.bin"
+      ],
+      "context": "W->X region = DECRYPTED PAYLOAD (made executable)"
+    },
+    {
+      "type": "file:imphash",
+      "value": "d073d1854680ff2ddd038760f5090798",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region1_0x1e0000_PE.bin",
+        "unpacked dump: api_region1_0x1e0000_rebuilt.exe"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:imphash",
+      "value": "eb76140cc31cd615e218e51dbcad0a7b",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_fullmodule_0x10000000_PE.bin",
+        "unpacked dump: api_fullmodule_0x10000000_rebuilt.exe"
+      ],
+      "context": "full module at W->X flip (-> reconstruct)"
+    },
+    {
+      "type": "file:md5",
+      "value": "0a2fdfae075f7b1f75c66c361b7b3a75",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_plan_7000.bin"
+      ],
+      "context": "memory dump"
+    },
+    {
+      "type": "file:md5",
+      "value": "2740f5927c507bc0df49f3a70d387699",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region0_0x670000.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:md5",
+      "value": "72389e9e2971cd7227dd5aa2543d6c73",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region2_0x6f0000.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:md5",
+      "value": "8e83c0e987ab924696ecbf13b7d380fa",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_fullmodule_0x10000000_PE.bin"
+      ],
+      "context": "full module at W->X flip (-> reconstruct)"
+    },
+    {
+      "type": "file:md5",
+      "value": "9fc8d8fc35a3e4eb385f169eb16d6d16",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_fullmodule_0x10000000_rebuilt.exe"
+      ],
+      "context": "full module at W->X flip (-> reconstruct)"
+    },
+    {
+      "type": "file:md5",
+      "value": "a82f9ad175ac3348c41732ab35a8ae37",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region1_0x1e0000_rebuilt.exe"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:md5",
+      "value": "b8dd20ffc4818f4d84926096b7fb5a0c",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region1_0x1e0000_PE.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "1c6dc0ead956ce59fe60bf4129bf28c546235e72",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_fullmodule_0x10000000_rebuilt.exe"
+      ],
+      "context": "full module at W->X flip (-> reconstruct)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "28c0cfc2018c56cc9f38898110c58e99e96291af",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region1_0x1e0000_PE.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "4529126188c6caa7b1c19bd2dcde9569b69abd34",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_fullmodule_0x10000000_PE.bin"
+      ],
+      "context": "full module at W->X flip (-> reconstruct)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "8bb5b791529527b94389520275d722d59572b4be",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region0_0x670000.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "983996b19b23392bdd4ad788611bca58773511a0",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region1_0x1e0000_rebuilt.exe"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha1",
+      "value": "f801f5fece28bb9e75527b01d536f11cbb8d9296",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_plan_7000.bin"
+      ],
+      "context": "memory dump"
+    },
+    {
+      "type": "file:sha1",
+      "value": "ff0de078f2ba2b1392b6f9a01200bf1c5b1e4b3c",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region2_0x6f0000.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "1049554dd71543ea961666920a5d58bc10bc354548044217c5f1556385edbebe",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region0_0x670000.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "21371fb6006741a1e36c5b09a8fcdc6006f71f0dbb7c2e79e29b2db5f357293c",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region1_0x1e0000_rebuilt.exe"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "21d45d1d7805dc08a41fc906b59c9bc1282dc71c55c272d512bd600374605b6c",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region1_0x1e0000_PE.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "2cbbeef1249170a43854962fa5b19fba628470c70beb9ce23e15a0f05cb891f2",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_region2_0x6f0000.bin"
+      ],
+      "context": "memory region the malware ALLOCATED (work buffer / staged data)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "4a70fa518fa190dd0e222e8248527d4eed1d326de7fdf979abeca1ed90a0d678",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_plan_7000.bin"
+      ],
+      "context": "memory dump"
+    },
+    {
+      "type": "file:sha256",
+      "value": "73e2d956e6e712eee57d85215ca81ae5fd4db2cc0802038672c08790c3491029",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_fullmodule_0x10000000_PE.bin"
+      ],
+      "context": "full module at W->X flip (-> reconstruct)"
+    },
+    {
+      "type": "file:sha256",
+      "value": "bc0886d626ba6ca8c60ab997b578c66a92abae0a72fa1a17fbe4cd0570892289",
+      "usage": "context",
+      "tier": "unpacked",
+      "confidence": 70,
+      "sources": [
+        "unpacked dump: api_fullmodule_0x10000000_rebuilt.exe"
+      ],
+      "context": "full module at W->X flip (-> reconstruct)"
+    },
+    {
+      "type": "compile-timestamp",
+      "value": "2020-04-24 02:04:11 UTC",
+      "usage": "context",
+      "tier": "static",
+      "confidence": 40,
+      "sources": [
+        "attribution"
+      ],
+      "context": "PE header timestamp (can be forged)"
+    },
+    {
+      "type": "version-info",
+      "value": "CompanyName=INCA Internet Co., Ltd.",
+      "usage": "context",
+      "tier": "static",
+      "confidence": 40,
+      "sources": [
+        "attribution"
+      ],
+      "context": "possible masquerade"
+    },
+    {
+      "type": "version-info",
+      "value": "InternalName=npkpdb.dll",
+      "usage": "context",
+      "tier": "static",
+      "confidence": 40,
+      "sources": [
+        "attribution"
+      ],
+      "context": "possible masquerade"
+    },
+    {
+      "type": "version-info",
+      "value": "OriginalFilename=npkpdb.dll",
+      "usage": "context",
+      "tier": "static",
+      "confidence": 40,
+      "sources": [
+        "attribution"
+      ],
+      "context": "possible masquerade"
+    },
+    {
+      "type": "version-info",
+      "value": "ProductName=nProtect KeyCrypt Program Database DLL",
+      "usage": "context",
+      "tier": "static",
+      "confidence": 40,
+      "sources": [
+        "attribution"
+      ],
+      "context": "possible masquerade"
+    }
+  ],
+  "excluded": [],
+  "availability": {
+    "file hashes": {
+      "count": 9,
+      "note": "sample + unpacked payloads"
+    },
+    "network (C2 / download)": {
+      "count": 0,
+      "high_confidence": 0,
+      "note": "none recovered with confidence: the C2 configuration is probably encrypted at rest and decrypted only when it beacons \u2014 run the detonation phase (FakeNet capture) or recover the config key"
+    },
+    "host artefacts": {
+      "count": 0,
+      "note": "none observed in the code recovered so far"
+    },
+    "build / attribution": {
+      "count": 5,
+      "note": ""
+    }
+  }
+}

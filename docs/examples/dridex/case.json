@@ -1,0 +1,3293 @@
+{
+  "sample": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+  "name": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+  "dir": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex",
+  "sha256": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1",
+  "size": 212992,
+  "created": "2026-10-21T16:20:30",
+  "run_id": "ce45ac67-2b3c-455d-9c12-e11b0a0c5059",
+  "stages": {
+    "triage": {
+      "path": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+      "hashes": {
+        "size": 212992,
+        "md5": "6a8401448a5bd2b540850f811b20a66d",
+        "sha1": "9f01d4442c495c7128649b98201187bc0c58dedd",
+        "sha256": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1"
+      },
+      "arch": "x86",
+      "kind": "exe",
+      "filetype": "PE32",
+      "compiler": "Microsoft Visual C/C++ 19.00.24215",
+      "linker": "Microsoft Linker 9.00.21022",
+      "die_available": true,
+      "die_error": null,
+      "packing": {
+        "likely_packed": false,
+        "confidence": 10,
+        "packer": null,
+        "reasons": [
+          "uncommon high-entropy section '.text1' (7.96)"
+        ]
+      },
+      "pe": {
+        "arch": "x86",
+        "kind": "exe",
+        "entrypoint_rva": 13299,
+        "entrypoint_section": ".text",
+        "image_base": 268435456,
+        "sections": [
+          {
+            "name": ".text",
+            "vsize": 9506,
+            "rawsize": 12288,
+            "entropy": 5.55,
+            "exec": true,
+            "write": false,
+            "uncommon_name": false,
+            "contains_ep": true,
+            "w_and_x": false
+          },
+          {
+            "name": ".rdata",
+            "vsize": 3204,
+            "rawsize": 4096,
+            "entropy": 3.21,
+            "exec": false,
+            "write": false,
+            "uncommon_name": false,
+            "contains_ep": false,
+            "w_and_x": false
+          },
+          {
+            "name": ".data",
+            "vsize": 4292,
+            "rawsize": 4096,
+            "entropy": 0.08,
+            "exec": false,
+            "write": true,
+            "uncommon_name": false,
+            "contains_ep": false,
+            "w_and_x": false
+          },
+          {
+            "name": ".text1",
+            "vsize": 179563,
+            "rawsize": 180224,
+            "entropy": 7.96,
+            "exec": false,
+            "write": true,
+            "uncommon_name": true,
+            "contains_ep": false,
+            "w_and_x": false
+          },
+          {
+            "name": ".rsrc",
+            "vsize": 1816,
+            "rawsize": 4096,
+            "entropy": 1.32,
+            "exec": false,
+            "write": false,
+            "uncommon_name": false,
+            "contains_ep": false,
+            "w_and_x": false
+          },
+          {
+            "name": ".reloc",
+            "vsize": 276,
+            "rawsize": 4096,
+            "entropy": 0.66,
+            "exec": false,
+            "write": false,
+            "uncommon_name": false,
+            "contains_ep": false,
+            "w_and_x": false
+          }
+        ],
+        "import_dll_count": 10,
+        "import_func_count": 17,
+        "imports": {
+          "RPCRT4.dll": [
+            "I_RpcNsInterfaceExported"
+          ],
+          "ADVAPI32.dll": [
+            "PrivilegeCheck"
+          ],
+          "OLEAUT32.dll": [
+            "VarI2FromDate"
+          ],
+          "pdh.dll": [
+            "PdhExpandWildCardPathW"
+          ],
+          "KERNEL32.dll": [
+            "GetModuleHandleW",
+            "LoadLibraryExW",
+            "ExitProcess",
+            "GetLastError",
+            "GetModuleFileNameA"
+          ],
+          "SHLWAPI.dll": [
+            "SHGetValueA",
+            "SHDeleteKeyA"
+          ],
+          "WININET.dll": [
+            "InternetCombineUrlA"
+          ],
+          "SETUPAPI.dll": [
+            "SetupDuplicateDiskSpaceListW"
+          ],
+          "USER32.dll": [
+            "GetQueueStatus",
+            "GetScrollPos",
+            "FindWindowExW"
+          ],
+          "msvcrt.dll": [
+            "isalpha"
+          ]
+        },
+        "suspicious_apis": {},
+        "exports": [
+          "BpfrBpdm16"
+        ],
+        "has_tls": false,
+        "tls_callbacks": [],
+        "signed": false,
+        "overlay_bytes": 0
+      },
+      "next": {
+        "action": "static_deep",
+        "why": "no strong packing signal; go to Ghidra"
+      }
+    },
+    "deep_static_packed": {
+      "stage": "packed",
+      "size": 212992,
+      "entropy": 7.536,
+      "string_count": 817,
+      "urls": [],
+      "ips": [],
+      "domains": [],
+      "emails": [],
+      "registry": [],
+      "file_paths": [],
+      "pdb_paths": [],
+      "guids": [],
+      "user_agents": [],
+      "wallets": [],
+      "commands": [],
+      "service_ops": [],
+      "mutex_hints": [],
+      "base64_blobs": [],
+      "suspicious_keywords": [],
+      "anti_analysis_indicators": [
+        "FindWindow",
+        "Sleep"
+      ]
+    },
+    "code_patterns_packed": {
+      "arch": "x86",
+      "scanned_bytes": 212992,
+      "findings": [
+        {
+          "id": "int2d_antidbg",
+          "severity": "high",
+          "title": "int 2Dh anti-debug",
+          "count": 1,
+          "offsets": [
+            "0x121a0"
+          ],
+          "why": "int 2Dh \u2014 a well-known anti-debugging trap (behaves differently under a debugger)"
+        },
+        {
+          "id": "packer_sections",
+          "severity": "high",
+          "title": "Known packer section name(s)",
+          "count": 1,
+          "offsets": [
+            ".text1"
+          ],
+          "why": "section names match a known packer/protector"
+        },
+        {
+          "id": "rdtsc_timing",
+          "severity": "medium",
+          "title": "rdtsc timing check",
+          "count": 2,
+          "offsets": [
+            "0x1b2a",
+            "0x1b2e"
+          ],
+          "why": "reads the CPU timestamp counter \u2014 common timing-based anti-debug/anti-sandbox"
+        },
+        {
+          "id": "cpuid",
+          "severity": "medium",
+          "title": "cpuid instruction",
+          "count": 5,
+          "offsets": [
+            "0xbcdc",
+            "0xe8ac",
+            "0x1b226",
+            "0x263ad",
+            "0x2645a"
+          ],
+          "why": "queries CPU/hypervisor features \u2014 common anti-VM (hypervisor-bit / vendor string) check"
+        },
+        {
+          "id": "pushad_popad",
+          "severity": "medium",
+          "title": "pushad/popad packer stub",
+          "count": 374,
+          "offsets": [
+            "0x30b",
+            "0x2445",
+            "0x3348",
+            "0x42b6",
+            "0x443e",
+            "0x6344",
+            "0x652a",
+            "0x6b8e"
+          ],
+          "why": "save-all/restore-all register bracket \u2014 hallmark of a packer unpacking stub"
+        },
+        {
+          "id": "high_entropy_sections",
+          "severity": "medium",
+          "title": "High-entropy (likely compressed/encrypted) section(s)",
+          "count": 1,
+          "offsets": [
+            ".text1 (H=7.958)"
+          ],
+          "why": "entropy >= 7.0 indicates packed/encrypted content (hidden payload)"
+        },
+        {
+          "id": "indirect_call_reg",
+          "severity": "info",
+          "title": "Indirect call through register (call eax..edi)",
+          "count": 53,
+          "offsets": [
+            "0x1a26",
+            "0x1ad9",
+            "0x1df1",
+            "0x1e52",
+            "0x1ea6",
+            "0x1f01",
+            "0x1f75",
+            "0x1fcd"
+          ],
+          "why": "dynamically-resolved call target \u2014 obfuscated control flow / runtime API resolution"
+        },
+        {
+          "id": "indirect_jmp_reg",
+          "severity": "info",
+          "title": "Indirect jump through register (jmp eax..edi)",
+          "count": 17,
+          "offsets": [
+            "0x9d40",
+            "0xcdae",
+            "0xd77c",
+            "0xe7a8",
+            "0x13b8a",
+            "0x13f7a",
+            "0x1444a",
+            "0x149d6"
+          ],
+          "why": "computed jump \u2014 tail-call into unpacked code / obfuscated control flow"
+        }
+      ],
+      "sections": [
+        {
+          "name": ".text",
+          "vsize": 9506,
+          "rawsize": 12288,
+          "entropy": 5.548,
+          "exec": true,
+          "write": false
+        },
+        {
+          "name": ".rdata",
+          "vsize": 3204,
+          "rawsize": 4096,
+          "entropy": 3.211,
+          "exec": false,
+          "write": false
+        },
+        {
+          "name": ".data",
+          "vsize": 4292,
+          "rawsize": 4096,
+          "entropy": 0.08,
+          "exec": false,
+          "write": true
+        },
+        {
+          "name": ".text1",
+          "vsize": 179563,
+          "rawsize": 180224,
+          "entropy": 7.958,
+          "exec": false,
+          "write": true
+        },
+        {
+          "name": ".rsrc",
+          "vsize": 1816,
+          "rawsize": 4096,
+          "entropy": 1.322,
+          "exec": false,
+          "write": false
+        },
+        {
+          "name": ".reloc",
+          "vsize": 276,
+          "rawsize": 4096,
+          "entropy": 0.665,
+          "exec": false,
+          "write": false
+        }
+      ],
+      "entry_disasm": {
+        "entry_va": "0x100033f3",
+        "arch": "x86",
+        "listing": [
+          "0x100033f3: lea esi, [0x10003414]",
+          "0x100033f9: mov dword ptr [0x10005010], esp",
+          "0x100033ff: mov dword ptr [0x10005008], ebx",
+          "0x10003405: push esi",
+          "0x10003406: jmp 0x10003409",
+          "0x10003408: ret",
+          "0x10003409: mov dword ptr [0x1000500c], ebp",
+          "0x1000340f: jmp 0x10003408",
+          "0x10003411: mov dword ptr [ebp - 4], eax",
+          "0x10003414: push ebp",
+          "0x10003415: mov ebp, esp",
+          "0x10003417: push esi",
+          "0x10003418: sub esp, 0x28",
+          "0x1000341b: mov dword ptr [ebp - 8], 0x47e5a87e",
+          "0x10003422: mov dword ptr [ebp - 0xc], 0x114b2e7f",
+          "0x10003429: call 0x10002879",
+          "0x1000342e: mov ecx, 0x47e5a87e",
+          "0x10003433: sub ecx, dword ptr [ebp - 8]",
+          "0x10003436: cmp eax, ecx",
+          "0x10003438: jne 0x100034a1",
+          "0x1000343a: mov eax, 0x550a76b",
+          "0x1000343f: cmp eax, dword ptr [ebp - 0xc]",
+          "0x10003442: jae 0x10003480",
+          "0x10003444: lea eax, [0x10004442]",
+          "0x1000344a: xor ecx, ecx",
+          "0x1000344c: mov edx, 1",
+          "0x10003451: mov esi, esp",
+          "0x10003453: mov dword ptr [esi + 8], 1",
+          "0x1000345a: mov dword ptr [esi + 4], 0",
+          "0x10003461: mov dword ptr [esi], 0x10004442",
+          "0x10003467: mov esi, dword ptr [0x1000400c]",
+          "0x1000346d: mov dword ptr [ebp - 0x10], eax",
+          "0x10003470: mov dword ptr [ebp - 0x14], ecx",
+          "0x10003473: mov dword ptr [ebp - 0x18], edx",
+          "0x10003476: call esi",
+          "0x10003478: sub esp, 0xc",
+          "0x1000347b: cmp eax, 0",
+          "0x1000347e: jne 0x100034a1",
+          "0x10003480: lea eax, [0x10004456]",
+          "0x10003486: mov ecx, esp",
+          "0x10003488: mov dword ptr [ecx], 0x10004456",
+          "0x1000348e: mov ecx, dword ptr [0x10004008]",
+          "0x10003494: mov dword ptr [ebp - 0x1c], eax",
+          "0x10003497: call ecx",
+          "0x10003499: sub esp, 4",
+          "0x1000349c: cmp eax, 0",
+          "0x1000349f: je 0x100034a7",
+          "0x100034a1: add esp, 0x28",
+          "0x100034a4: pop esi",
+          "0x100034a5: pop ebp",
+          "0x100034a6: ret",
+          "0x100034a7: call 0x1000127e",
+          "0x100034ac: mov dword ptr [ebp - 0x20], eax",
+          "0x100034af: call 0x10002bb8",
+          "0x100034b4: jmp 0x100034a1",
+          "0x100034b6: push ebp",
+          "0x100034b7: mov ebp, esp",
+          "0x100034b9: pop ebp",
+          "0x100034ba: ret",
+          "0x100034bb: int3"
+        ],
+        "flagged": [
+          "0x10003476: call esi   ; indirect call (computed/obfuscated target)",
+          "0x10003497: call ecx   ; indirect call (computed/obfuscated target)",
+          "0x100034bb: int3   ; breakpoint/anti-disasm"
+        ]
+      },
+      "counts": {
+        "high": 2,
+        "medium": 4,
+        "info": 2
+      }
+    },
+    "entropy_map": {
+      "file_size": 212992,
+      "file_entropy": 7.536,
+      "block": 4096,
+      "sections": [
+        {
+          "name": ".text",
+          "file_off": 4096,
+          "raw_size": 12288,
+          "rva": "0x1000",
+          "vsize": 9506,
+          "entropy": 5.548,
+          "exec": true,
+          "write": false,
+          "runtime_expanded": false
+        },
+        {
+          "name": ".rdata",
+          "file_off": 16384,
+          "raw_size": 4096,
+          "rva": "0x4000",
+          "vsize": 3204,
+          "entropy": 3.211,
+          "exec": false,
+          "write": false,
+          "runtime_expanded": false
+        },
+        {
+          "name": ".data",
+          "file_off": 20480,
+          "raw_size": 4096,
+          "rva": "0x5000",
+          "vsize": 4292,
+          "entropy": 0.08,
+          "exec": false,
+          "write": true,
+          "runtime_expanded": false
+        },
+        {
+          "name": ".text1",
+          "file_off": 24576,
+          "raw_size": 180224,
+          "rva": "0x7000",
+          "vsize": 179563,
+          "entropy": 7.958,
+          "exec": false,
+          "write": true,
+          "runtime_expanded": false
+        },
+        {
+          "name": ".rsrc",
+          "file_off": 204800,
+          "raw_size": 4096,
+          "rva": "0x33000",
+          "vsize": 1816,
+          "entropy": 1.322,
+          "exec": false,
+          "write": false,
+          "runtime_expanded": false
+        },
+        {
+          "name": ".reloc",
+          "file_off": 208896,
+          "raw_size": 4096,
+          "rva": "0x34000",
+          "vsize": 276,
+          "entropy": 0.665,
+          "exec": false,
+          "write": false,
+          "runtime_expanded": false
+        }
+      ],
+      "regions": [
+        {
+          "file_off": 28672,
+          "size": 172032,
+          "entropy": 7.955,
+          "blocks": 42,
+          "section": ".text1",
+          "rva": "0x8000",
+          "kind": "high-entropy"
+        }
+      ],
+      "overlay": null,
+      "resources": [
+        {
+          "type": "16",
+          "name": "1",
+          "size": 1100,
+          "entropy": 3.412,
+          "file_off": 205512,
+          "rva": "0x332c8"
+        }
+      ],
+      "image_base": "0x10000000",
+      "size_of_image": 217088,
+      "entry_rva": "0x33f3",
+      "tls_callbacks": []
+    },
+    "ai_assessment_packed": {
+      "stage": "packed",
+      "likely_family": "unknown",
+      "family_confidence": "low",
+      "capabilities": [
+        "anti-debugging (int 2Dh)",
+        "timing checks (rdtsc)",
+        "environment detection (cpuid)"
+      ],
+      "config_leads": [],
+      "url_leads": [],
+      "encrypted_regions": [
+        {
+          "where": ".text1",
+          "likely": "encrypted",
+          "evidence": "high entropy (H=7.958)"
+        }
+      ],
+      "notable_strings": [],
+      "packer_assessment": "likely packed or crypted due to high entropy in .text1 and known packer section name",
+      "anti_analysis_expected": [
+        "anti-debugging (int 2Dh, int3)",
+        "timing checks (rdtsc)",
+        "environment detection (cpuid)"
+      ],
+      "dynamic_strategy": [
+        "Set breakpoints on indirect calls at 0x10003476 and 0x10003497",
+        "Monitor memory writes to .text1 section",
+        "Dump memory after initial unpacking routine completes"
+      ],
+      "reasoning": "The presence of a high-entropy section (.text1) and known packer indicators suggest the binary is packed. Anti-analysis techniques such as int 2Dh, rdtsc, and cpuid are present, indicating attempts to evade debugging and virtualized environments. The indirect calls and high entropy suggest runtime unpacking, necessitating dynamic analysis to reveal the payload.",
+      "_ai_model": "gpt-4o",
+      "claims_audit": {
+        "encrypted_regions": [
+          {
+            "claim": ".text1",
+            "likely": "encrypted",
+            "supported": true,
+            "basis": "section entropy .text=5.548, .text1=7.958"
+          }
+        ],
+        "url_leads": [],
+        "unsupported": 0
+      }
+    },
+    "ai_dynamic_plan": {
+      "proposed": {
+        "hypothesis": "The sample is likely packed or encrypted using a custom packer, indicated by the high entropy in the .text1 section and known packer section name.",
+        "priority_apis": [
+          {
+            "api": "VirtualAlloc",
+            "why": "Commonly used for allocating memory for unpacked code."
+          },
+          {
+            "api": "VirtualProtect",
+            "why": "Used to change memory protection, often seen in unpacking routines."
+          },
+          {
+            "api": "NtWriteVirtualMemory",
+            "why": "May be used to write unpacked code into allocated memory."
+          },
+          {
+            "api": "FlushInstructionCache",
+            "why": "Ensures CPU executes the latest code, often used after unpacking."
+          }
+        ],
+        "watch_regions": [
+          {
+            "rva": "0x7000",
+            "size": "0x2bd6b",
+            "why": "High-entropy section likely contains packed/encrypted code."
+          }
+        ],
+        "anti_evasion": [
+          {
+            "technique": "anti-debugging (int 2Dh, int3)",
+            "action": "Use a debugger that can handle these interrupts."
+          },
+          {
+            "technique": "timing checks (rdtsc)",
+            "action": "Patch or emulate rdtsc to avoid detection."
+          },
+          {
+            "technique": "environment detection (cpuid)",
+            "action": "Emulate or patch cpuid to return expected values."
+          }
+        ],
+        "expected_events": [
+          "Memory allocation and protection changes for unpacked code.",
+          "Decrypted or unpacked code written to memory.",
+          "Execution of unpacked code after cache flush."
+        ]
+      },
+      "accepted": {
+        "hypothesis": "The sample is likely packed or encrypted using a custom packer, indicated by the high entropy in the .text1 section and known packer section name.",
+        "priority_apis": [
+          {
+            "api": "VirtualAlloc",
+            "why": "Commonly used for allocating memory for unpacked code."
+          },
+          {
+            "api": "VirtualProtect",
+            "why": "Used to change memory protection, often seen in unpacking routines."
+          },
+          {
+            "api": "NtWriteVirtualMemory",
+            "why": "May be used to write unpacked code into allocated memory."
+          },
+          {
+            "api": "FlushInstructionCache",
+            "why": "Ensures CPU executes the latest code, often used after unpacking."
+          }
+        ],
+        "watch_regions": [
+          {
+            "rva": 28672,
+            "size": 179563,
+            "why": "High-entropy section likely contains packed/encrypted code."
+          }
+        ],
+        "anti_evasion": [
+          {
+            "technique": "anti-debugging (int 2Dh, int3)",
+            "action": "Use a debugger that can handle these interrupts.",
+            "status": "advisory only (not executed automatically)"
+          },
+          {
+            "technique": "timing checks (rdtsc)",
+            "action": "Patch or emulate rdtsc to avoid detection.",
+            "status": "advisory only (not executed automatically)"
+          },
+          {
+            "technique": "environment detection (cpuid)",
+            "action": "Emulate or patch cpuid to return expected values.",
+            "status": "advisory only (not executed automatically)"
+          }
+        ],
+        "expected_events": [
+          "Memory allocation and protection changes for unpacked code.",
+          "Decrypted or unpacked code written to memory.",
+          "Execution of unpacked code after cache flush."
+        ]
+      },
+      "rejected": [],
+      "region_audit": [
+        {
+          "rva": "0x7000",
+          "supported": true,
+          "basis": "overlaps a high-entropy high-entropy (H=7.955)"
+        }
+      ]
+    },
+    "load_info": {
+      "module": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1_d2df96.exe",
+      "entry": "0x100033F3",
+      "eip": "0x771D4DF1",
+      "at_entry": false,
+      "early_pause": true,
+      "note": "paused early in the loader, before any of the sample's code ran"
+    },
+    "api_trace": {
+      "trace": [
+        {
+          "api": "kernel32.VirtualAlloc",
+          "cat": "alloc",
+          "n": 1,
+          "args": {
+            "lpAddress": "0x0",
+            "dwSize": "0x2b000",
+            "flType": "0x1000",
+            "flProtect": "0x4"
+          },
+          "capture": {
+            "note": "returned base 0x670000"
+          }
+        },
+        {
+          "api": "kernel32.VirtualAlloc",
+          "cat": "alloc",
+          "n": 2,
+          "args": {
+            "lpAddress": "0x0",
+            "dwSize": "0x6000",
+            "flType": "0x1000",
+            "flProtect": "0x40"
+          },
+          "capture": {
+            "note": "returned base 0x1e0000"
+          }
+        },
+        {
+          "api": "kernel32.LoadLibraryA",
+          "cat": "load",
+          "n": 1,
+          "args": {
+            "lpName": "0x1e30f2"
+          },
+          "capture": {
+            "note": "\"\""
+          }
+        },
+        {
+          "api": "kernel32.VirtualAlloc",
+          "cat": "alloc",
+          "n": 3,
+          "args": {
+            "lpAddress": "0x0",
+            "dwSize": "0x2a000",
+            "flType": "0x1000",
+            "flProtect": "0x4"
+          },
+          "capture": {
+            "note": "returned base 0x6f0000"
+          }
+        },
+        {
+          "api": "kernel32.LoadLibraryA",
+          "cat": "load",
+          "n": 2,
+          "args": {
+            "lpName": "0x717e80"
+          },
+          "capture": {
+            "note": "\"KERNEL32.dll\""
+          }
+        },
+        {
+          "api": "kernel32.LoadLibraryA",
+          "cat": "load",
+          "n": 3,
+          "args": {
+            "lpName": "0x717e9e"
+          },
+          "capture": {
+            "note": "\"ADVAPI32.dll\""
+          }
+        },
+        {
+          "api": "kernel32.VirtualProtect",
+          "cat": "protect",
+          "n": 1,
+          "args": {
+            "lpAddress": "0x10000000",
+            "dwSize": "0x35000",
+            "flNewProtect": "0x4",
+            "lpOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "protect 0x4 (not exec)"
+          }
+        },
+        {
+          "api": "ntdll.NtProtectVirtualMemory",
+          "cat": "protect",
+          "n": 1,
+          "args": {
+            "hProc": "0xffffffff",
+            "pBase": "0x19fcf8",
+            "pSize": "0x19fcfc",
+            "newProt": "0x4",
+            "pOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "NtProtect newProt=0x4"
+          }
+        },
+        {
+          "api": "kernel32.VirtualProtect",
+          "cat": "protect",
+          "n": 2,
+          "args": {
+            "lpAddress": "0x10000000",
+            "dwSize": "0x400",
+            "flNewProtect": "0x2",
+            "lpOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "protect 0x2 (not exec)"
+          }
+        },
+        {
+          "api": "ntdll.NtProtectVirtualMemory",
+          "cat": "protect",
+          "n": 2,
+          "args": {
+            "hProc": "0xffffffff",
+            "pBase": "0x19fcf8",
+            "pSize": "0x19fcfc",
+            "newProt": "0x2",
+            "pOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "NtProtect newProt=0x2"
+          }
+        },
+        {
+          "api": "kernel32.VirtualProtect",
+          "cat": "protect",
+          "n": 3,
+          "args": {
+            "lpAddress": "0x10001000",
+            "dwSize": "0x20d11",
+            "flNewProtect": "0x20",
+            "lpOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "W->X region 0x10001000+0x20d11 [full-module dumped]",
+            "dump": "C:\\nemesis\\api_wx_0x10001000.bin",
+            "module_dump": "C:\\nemesis\\api_fullmodule_0x10000000.bin",
+            "local_dump": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_wx_0x10001000.bin",
+            "ioc": {
+              "dump_size": 134417,
+              "string_count": 146,
+              "urls": [],
+              "ips": [],
+              "registry": [],
+              "emails": [],
+              "suspicious_keywords": []
+            },
+            "local_module_dump": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_fullmodule_0x10000000.bin"
+          }
+        },
+        {
+          "api": "ntdll.NtProtectVirtualMemory",
+          "cat": "protect",
+          "n": 3,
+          "args": {
+            "hProc": "0xffffffff",
+            "pBase": "0x19fcf8",
+            "pSize": "0x19fcfc",
+            "newProt": "0x20",
+            "pOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "W->X (native) 0x10001000+0x20d11",
+            "dump": "C:\\nemesis\\api_ntwx_0x10001000.bin",
+            "local_dump": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_ntwx_0x10001000.bin",
+            "ioc": {
+              "dump_size": 134417,
+              "string_count": 146,
+              "urls": [],
+              "ips": [],
+              "registry": [],
+              "emails": [],
+              "suspicious_keywords": []
+            }
+          }
+        },
+        {
+          "api": "kernel32.VirtualProtect",
+          "cat": "protect",
+          "n": 4,
+          "args": {
+            "lpAddress": "0x10022000",
+            "dwSize": "0x5efe",
+            "flNewProtect": "0x2",
+            "lpOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "protect 0x2 (not exec)"
+          }
+        },
+        {
+          "api": "ntdll.NtProtectVirtualMemory",
+          "cat": "protect",
+          "n": 4,
+          "args": {
+            "hProc": "0xffffffff",
+            "pBase": "0x19fcf8",
+            "pSize": "0x19fcfc",
+            "newProt": "0x2",
+            "pOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "NtProtect newProt=0x2"
+          }
+        },
+        {
+          "api": "kernel32.VirtualProtect",
+          "cat": "protect",
+          "n": 5,
+          "args": {
+            "lpAddress": "0x10028000",
+            "dwSize": "0x3e8",
+            "flNewProtect": "0x4",
+            "lpOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "protect 0x4 (not exec)"
+          }
+        },
+        {
+          "api": "ntdll.NtProtectVirtualMemory",
+          "cat": "protect",
+          "n": 5,
+          "args": {
+            "hProc": "0xffffffff",
+            "pBase": "0x19fcf8",
+            "pSize": "0x19fcfc",
+            "newProt": "0x4",
+            "pOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "NtProtect newProt=0x4"
+          }
+        },
+        {
+          "api": "kernel32.VirtualProtect",
+          "cat": "protect",
+          "n": 6,
+          "args": {
+            "lpAddress": "0x10029000",
+            "dwSize": "0xec8",
+            "flNewProtect": "0x2",
+            "lpOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "protect 0x2 (not exec)"
+          }
+        },
+        {
+          "api": "ntdll.NtProtectVirtualMemory",
+          "cat": "protect",
+          "n": 6,
+          "args": {
+            "hProc": "0xffffffff",
+            "pBase": "0x19fcf8",
+            "pSize": "0x19fcfc",
+            "newProt": "0x2",
+            "pOld": "0x19fda0"
+          },
+          "capture": {
+            "note": "NtProtect newProt=0x2"
+          }
+        }
+      ],
+      "counts": {
+        "kernel32.VirtualAlloc": 3,
+        "kernel32.LoadLibraryA": 3,
+        "kernel32.VirtualProtect": 6,
+        "ntdll.NtProtectVirtualMemory": 6
+      },
+      "plan_dumps": [
+        {
+          "rva": "0x7000",
+          "addr": "0x10007000",
+          "size": 179563,
+          "dump": "C:\\nemesis\\api_plan_7000.bin",
+          "why": "High-entropy section likely contains packed/encrypted code.",
+          "local_dump": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_plan_7000.bin",
+          "ioc": {
+            "dump_size": 179563,
+            "string_count": 321,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "emails": [],
+            "suspicious_keywords": []
+          }
+        }
+      ],
+      "watched_regions": [
+        "0x670000",
+        "0x1e0000",
+        "0x6f0000"
+      ],
+      "region_dumps": [
+        {
+          "base": "0x670000",
+          "dump": "C:\\nemesis\\api_region0_0x670000.bin",
+          "size": 176128,
+          "local_dump": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_region0_0x670000.bin",
+          "ioc": {
+            "dump_size": 176128,
+            "string_count": 27,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "emails": [],
+            "suspicious_keywords": []
+          }
+        },
+        {
+          "base": "0x1e0000",
+          "dump": "C:\\nemesis\\api_region1_0x1e0000.bin",
+          "size": 24576,
+          "local_dump": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_region1_0x1e0000.bin",
+          "ioc": {
+            "dump_size": 24576,
+            "string_count": 27,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "emails": [],
+            "suspicious_keywords": []
+          }
+        },
+        {
+          "base": "0x6f0000",
+          "dump": "C:\\nemesis\\api_region2_0x6f0000.bin",
+          "size": 172032,
+          "local_dump": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_region2_0x6f0000.bin",
+          "ioc": {
+            "dump_size": 172032,
+            "string_count": 0,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "emails": [],
+            "suspicious_keywords": []
+          }
+        }
+      ]
+    },
+    "dynamic_unpack": {
+      "module": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1_d2df96.exe",
+      "payload_captured": true,
+      "reached_oep": true,
+      "wx_flips": [
+        "W->X region 0x10001000+0x20d11 [full-module dumped]",
+        "W->X (native) 0x10001000+0x20d11"
+      ],
+      "note": "payload captured at the W->X flip during the API trace"
+    },
+    "pe_reconstruction": {
+      "rebuilds": [
+        {
+          "ok": true,
+          "out": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_fullmodule_0x10000000_rebuilt.exe",
+          "image_base": "0x10000000",
+          "imports": 7,
+          "dll_count": 2,
+          "dlls": [
+            "ADVAPI32.dll",
+            "KERNEL32.dll"
+          ],
+          "sample_imports": [
+            "KERNEL32.dll!FreeConsole",
+            "KERNEL32.dll!ExitProcess",
+            "KERNEL32.dll!GetComputerNameW",
+            "KERNEL32.dll!AddVectoredExceptionHandler",
+            "KERNEL32.dll!OutputDebugStringW",
+            "KERNEL32.dll!Sleep",
+            "ADVAPI32.dll!GetUserNameW"
+          ],
+          "before": {
+            "image_base": "0x400000"
+          },
+          "source": "api_fullmodule_0x10000000.bin"
+        },
+        {
+          "ok": true,
+          "out": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_region1_0x1e0000_rebuilt.exe",
+          "image_base": "0x1e0000",
+          "imports": 2,
+          "dll_count": 1,
+          "dlls": [
+            "KERNEL32.dll"
+          ],
+          "sample_imports": [
+            "KERNEL32.dll!Sleep",
+            "KERNEL32.dll!FreeConsole"
+          ],
+          "before": {
+            "image_base": "0x400000"
+          },
+          "source": "api_region1_0x1e0000.bin"
+        }
+      ],
+      "best": {
+        "ok": true,
+        "out": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_fullmodule_0x10000000_rebuilt.exe",
+        "image_base": "0x10000000",
+        "imports": 7,
+        "dll_count": 2,
+        "dlls": [
+          "ADVAPI32.dll",
+          "KERNEL32.dll"
+        ],
+        "sample_imports": [
+          "KERNEL32.dll!FreeConsole",
+          "KERNEL32.dll!ExitProcess",
+          "KERNEL32.dll!GetComputerNameW",
+          "KERNEL32.dll!AddVectoredExceptionHandler",
+          "KERNEL32.dll!OutputDebugStringW",
+          "KERNEL32.dll!Sleep",
+          "ADVAPI32.dll!GetUserNameW"
+        ],
+        "before": {
+          "image_base": "0x400000"
+        },
+        "source": "api_fullmodule_0x10000000.bin"
+      }
+    },
+    "triage_reconstructed": {
+      "path": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/dumps/api_fullmodule_0x10000000_rebuilt.exe",
+      "hashes": {
+        "size": 217088,
+        "md5": "9fc8d8fc35a3e4eb385f169eb16d6d16",
+        "sha1": "1c6dc0ead956ce59fe60bf4129bf28c546235e72",
+        "sha256": "bc0886d626ba6ca8c60ab997b578c66a92abae0a72fa1a17fbe4cd0570892289"
+      },
+      "arch": "x86",
+      "kind": "exe",
+      "filetype": "PE32",
+      "compiler": "Microsoft Visual C/C++ 16.00.40219",
+      "linker": "Microsoft Linker 10.00.40219",
+      "die_available": true,
+      "die_error": null,
+      "packing": {
+        "likely_packed": false,
+        "confidence": 15,
+        "packer": null,
+        "reasons": [
+          "very few imports (7) \u2014 imports may be hidden"
+        ]
+      },
+      "pe": {
+        "arch": "x86",
+        "kind": "exe",
+        "entrypoint_rva": 13299,
+        "entrypoint_section": ".text",
+        "image_base": 268435456,
+        "sections": [
+          {
+            "name": ".text",
+            "vsize": 134417,
+            "rawsize": 134417,
+            "entropy": 6.55,
+            "exec": true,
+            "write": false,
+            "uncommon_name": false,
+            "contains_ep": true,
+            "w_and_x": false
+          },
+          {
+            "name": ".rdata",
+            "vsize": 24318,
+            "rawsize": 24318,
+            "entropy": 7.98,
+            "exec": false,
+            "write": false,
+            "uncommon_name": false,
+            "contains_ep": false,
+            "w_and_x": false
+          },
+          {
+            "name": ".data",
+            "vsize": 1000,
+            "rawsize": 1000,
+            "entropy": 7.63,
+            "exec": false,
+            "write": true,
+            "uncommon_name": false,
+            "contains_ep": false,
+            "w_and_x": false
+          },
+          {
+            "name": ".reloc",
+            "vsize": 3784,
+            "rawsize": 3784,
+            "entropy": 3.88,
+            "exec": false,
+            "write": false,
+            "uncommon_name": false,
+            "contains_ep": false,
+            "w_and_x": false
+          }
+        ],
+        "import_dll_count": 2,
+        "import_func_count": 7,
+        "imports": {
+          "KERNEL32.dll": [
+            "FreeConsole",
+            "ExitProcess",
+            "GetComputerNameW",
+            "AddVectoredExceptionHandler",
+            "OutputDebugStringW",
+            "Sleep"
+          ],
+          "ADVAPI32.dll": [
+            "GetUserNameW"
+          ]
+        },
+        "suspicious_apis": {},
+        "exports": [
+          "DllUnregisterServer"
+        ],
+        "has_tls": false,
+        "tls_callbacks": [],
+        "signed": false,
+        "overlay_bytes": 45368
+      },
+      "next": {
+        "action": "static_deep",
+        "why": "no strong packing signal; go to Ghidra"
+      }
+    },
+    "memory_static_reconstructed": {
+      "dump_size": 217088,
+      "string_count": 338,
+      "urls": [],
+      "ips": [],
+      "registry": [],
+      "emails": [],
+      "suspicious_keywords": []
+    },
+    "deep_static_unpacked": {
+      "stage": "unpacked",
+      "size": 217088,
+      "entropy": 5.744,
+      "string_count": 338,
+      "urls": [],
+      "ips": [],
+      "domains": [],
+      "emails": [],
+      "registry": [],
+      "file_paths": [],
+      "pdb_paths": [],
+      "guids": [],
+      "user_agents": [],
+      "wallets": [],
+      "commands": [],
+      "service_ops": [],
+      "mutex_hints": [],
+      "base64_blobs": [
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+      ],
+      "suspicious_keywords": [],
+      "anti_analysis_indicators": [
+        "OutputDebugString",
+        "Sleep"
+      ]
+    },
+    "code_patterns_unpacked": {
+      "arch": "x86",
+      "scanned_bytes": 217088,
+      "findings": [
+        {
+          "id": "rdtsc_timing",
+          "severity": "medium",
+          "title": "rdtsc timing check",
+          "count": 1,
+          "offsets": [
+            "0x25afe"
+          ],
+          "why": "reads the CPU timestamp counter \u2014 common timing-based anti-debug/anti-sandbox"
+        },
+        {
+          "id": "int3_sled",
+          "severity": "medium",
+          "title": "int3 (0xCC) sled",
+          "count": 280,
+          "offsets": [
+            "0x1012",
+            "0x1042",
+            "0x1069",
+            "0x1082",
+            "0x10c1",
+            "0x13ca",
+            "0x1514",
+            "0x1594"
+          ],
+          "why": "run of int3 bytes \u2014 padding/anti-disassembly or a breakpoint trap"
+        },
+        {
+          "id": "pushad_popad",
+          "severity": "medium",
+          "title": "pushad/popad packer stub",
+          "count": 92,
+          "offsets": [
+            "0x1ff",
+            "0x102c",
+            "0x1351",
+            "0x16cf",
+            "0x1a43",
+            "0x1f4b",
+            "0x2295",
+            "0x34f8"
+          ],
+          "why": "save-all/restore-all register bracket \u2014 hallmark of a packer unpacking stub"
+        },
+        {
+          "id": "high_entropy_sections",
+          "severity": "medium",
+          "title": "High-entropy (likely compressed/encrypted) section(s)",
+          "count": 2,
+          "offsets": [
+            ".rdata (H=7.982)",
+            ".data (H=7.631)"
+          ],
+          "why": "entropy >= 7.0 indicates packed/encrypted content (hidden payload)"
+        },
+        {
+          "id": "indirect_call_reg",
+          "severity": "info",
+          "title": "Indirect call through register (call eax..edi)",
+          "count": 50,
+          "offsets": [
+            "0x1767",
+            "0x5bdd",
+            "0x5bf2",
+            "0x5c07",
+            "0x5c1c",
+            "0x5e45",
+            "0x6653",
+            "0x74b4"
+          ],
+          "why": "dynamically-resolved call target \u2014 obfuscated control flow / runtime API resolution"
+        },
+        {
+          "id": "indirect_jmp_reg",
+          "severity": "info",
+          "title": "Indirect jump through register (jmp eax..edi)",
+          "count": 6,
+          "offsets": [
+            "0x62e2",
+            "0x64ee",
+            "0xb673",
+            "0x1b977",
+            "0x1c867",
+            "0x229c3"
+          ],
+          "why": "computed jump \u2014 tail-call into unpacked code / obfuscated control flow"
+        },
+        {
+          "id": "teb_selfmod",
+          "severity": "info",
+          "title": "Writable self-reference (GetModuleHandle(NULL) pattern)",
+          "count": 2,
+          "offsets": [
+            "0x629e",
+            "0x6383"
+          ],
+          "why": "push 0 ; call [import] \u2014 often GetModuleHandleA(NULL) before manual mapping"
+        }
+      ],
+      "sections": [
+        {
+          "name": ".text",
+          "vsize": 134417,
+          "rawsize": 134417,
+          "entropy": 6.552,
+          "exec": true,
+          "write": false
+        },
+        {
+          "name": ".rdata",
+          "vsize": 24318,
+          "rawsize": 24318,
+          "entropy": 7.982,
+          "exec": false,
+          "write": false
+        },
+        {
+          "name": ".data",
+          "vsize": 1000,
+          "rawsize": 1000,
+          "entropy": 7.631,
+          "exec": false,
+          "write": true
+        },
+        {
+          "name": ".reloc",
+          "vsize": 3784,
+          "rawsize": 3784,
+          "entropy": 3.88,
+          "exec": false,
+          "write": false
+        }
+      ],
+      "entry_disasm": {
+        "entry_va": "0x100033f3",
+        "arch": "x86",
+        "listing": [
+          "0x100033f3: add byte ptr [edx], ch",
+          "0x100033f6: lea ecx, [ebp - 8]",
+          "0x100033f9: call 0x10017380",
+          "0x100033fe: xor edx, edx",
+          "0x10003400: lea ecx, [ebp - 0x1c]",
+          "0x10003403: call 0x100073a0",
+          "0x10003408: mov eax, dword ptr [eax]",
+          "0x1000340a: push eax",
+          "0x1000340b: lea ecx, [ebp - 0x10]",
+          "0x1000340e: call 0x10017ec0",
+          "0x10003413: lea ecx, [ebp - 0x1c]",
+          "0x10003416: call 0x10016d40",
+          "0x1000341b: mov edx, 1",
+          "0x10003420: lea ecx, [ebp - 0x1c]",
+          "0x10003423: call 0x100073a0",
+          "0x10003428: mov ecx, dword ptr [eax]",
+          "0x1000342a: push ecx",
+          "0x1000342b: lea ecx, [ebp - 8]",
+          "0x1000342e: call 0x10017ec0",
+          "0x10003433: lea ecx, [ebp - 0x1c]",
+          "0x10003436: call 0x10016d40",
+          "0x1000343b: xor esi, esi",
+          "0x1000343d: lea ecx, [ecx]",
+          "0x10003440: push 0xd79959",
+          "0x10003445: push 0x2c05fbca",
+          "0x1000344a: mov dword ptr [ebp - 0x14], 0",
+          "0x10003451: call 0x1000d0d0",
+          "0x10003456: test eax, eax",
+          "0x10003458: je 0x10003465",
+          "0x1000345a: lea edx, [ebp - 0x14]",
+          "0x1000345d: push edx",
+          "0x1000345e: push 0x10002de0",
+          "0x10003463: int3",
+          "0x10003464: ret",
+          "0x10003465: cmp dword ptr [ebp - 0x14], 0",
+          "0x10003469: jne 0x10003488",
+          "0x1000346b: mov ecx, 0x3e8",
+          "0x10003470: call 0x1000ee30",
+          "0x10003475: inc esi",
+          "0x10003476: cmp esi, 0x3e8",
+          "0x1000347c: jl 0x10003440",
+          "0x1000347e: cmp dword ptr [ebp - 0x14], 0",
+          "0x10003482: je 0x1000354d",
+          "0x10003488: push 0xbb6379be",
+          "0x1000348d: push 0x2c05fbca",
+          "0x10003492: call 0x1000d0d0",
+          "0x10003497: test eax, eax",
+          "0x10003499: je 0x100034a5",
+          "0x1000349b: mov edx, dword ptr [ebp - 0x14]",
+          "0x1000349e: lea ecx, [ebp - 0x20]",
+          "0x100034a1: push ecx",
+          "0x100034a2: push edx",
+          "0x100034a3: int3",
+          "0x100034a4: ret",
+          "0x100034a5: mov eax, dword ptr [ebp - 0x20]",
+          "0x100034a8: push 0",
+          "0x100034aa: push eax",
+          "0x100034ab: lea ecx, [ebp - 0x84]",
+          "0x100034b1: call 0x1001cc20",
+          "0x100034b6: lea ecx, [ebp - 0x84]"
+        ],
+        "flagged": [
+          "0x10003463: int3   ; breakpoint/anti-disasm",
+          "0x100034a3: int3   ; breakpoint/anti-disasm"
+        ]
+      },
+      "counts": {
+        "high": 0,
+        "medium": 4,
+        "info": 3
+      }
+    },
+    "verify_unpack": {
+      "verdict": "CONFIRMED_UNPACKED",
+      "confidence": 60,
+      "reasons": [
+        "debugger captured the payload at 2 write->execute flip(s) (direct unpack evidence)",
+        "dump parses as a valid PE image"
+      ],
+      "metrics": {
+        "imports_packed": 17,
+        "imports_dumped": 7,
+        "packer_sections_packed": [],
+        "ep_entropy_packed": 5.55,
+        "ep_entropy_dumped": 6.55,
+        "new_urls": 0,
+        "new_ips": 0,
+        "dump_is_valid_pe": true
+      },
+      "breakdown": [
+        {
+          "signal": "W->X decryption captured",
+          "points": 50,
+          "max": 50,
+          "detail": "debugger captured the payload at 2 write->execute flip(s) (direct unpack evidence)"
+        },
+        {
+          "signal": "import table grew",
+          "points": 0,
+          "max": 35,
+          "detail": "imports 17 -> 7 (no growth)"
+        },
+        {
+          "signal": "packer sections removed",
+          "points": 0,
+          "max": 25,
+          "detail": "no packer section names in either"
+        },
+        {
+          "signal": "entropy dropped",
+          "points": 0,
+          "max": 20,
+          "detail": "entry-point entropy 5.55 -> 6.55 (no significant drop)"
+        },
+        {
+          "signal": "hidden IOCs revealed",
+          "points": 0,
+          "max": 25,
+          "detail": "no new network IOCs in the dump (may be encrypted config)"
+        },
+        {
+          "signal": "valid PE image",
+          "points": 10,
+          "max": 10,
+          "detail": "dump parses as a valid PE image"
+        }
+      ],
+      "compared": {
+        "packed": {
+          "name": "packed sample",
+          "size": 212992,
+          "md5": "6a8401448a5bd2b540850f811b20a66d",
+          "sha256": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1"
+        },
+        "unpacked": {
+          "name": "reconstructed: api_fullmodule_0x10000000_rebuilt.exe",
+          "size": 217088,
+          "md5": "9fc8d8fc35a3e4eb385f169eb16d6d16",
+          "sha256": "bc0886d626ba6ca8c60ab997b578c66a92abae0a72fa1a17fbe4cd0570892289"
+        }
+      },
+      "note": "Compare these MD5s against your file set \u2014 a packer that writes copies of itself will show the SAME hash across dropped files."
+    },
+    "dumps_manifest": {
+      "packed_md5": "6a8401448a5bd2b540850f811b20a66d",
+      "packed_sha256": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1",
+      "packed_imports": 17,
+      "dumps": [
+        {
+          "name": "api_fullmodule_0x10000000_PE.bin",
+          "path": "dumps/api_fullmodule_0x10000000_PE.bin",
+          "size": 217088,
+          "md5": "8e83c0e987ab924696ecbf13b7d380fa",
+          "sha256": "73e2d956e6e712eee57d85215ca81ae5fd4db2cc0802038672c08790c3491029",
+          "pe": true,
+          "role": "full module at W->X flip (-> reconstruct)",
+          "same_as_packed": false,
+          "imports": 7,
+          "dll_count": 2,
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".reloc"
+          ],
+          "strings": 338,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_fullmodule_0x10000000_rebuilt.exe",
+          "path": "dumps/api_fullmodule_0x10000000_rebuilt.exe",
+          "size": 217088,
+          "md5": "9fc8d8fc35a3e4eb385f169eb16d6d16",
+          "sha256": "bc0886d626ba6ca8c60ab997b578c66a92abae0a72fa1a17fbe4cd0570892289",
+          "pe": true,
+          "role": "full module at W->X flip (-> reconstruct)",
+          "same_as_packed": false,
+          "imports": 7,
+          "dll_count": 2,
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".reloc"
+          ],
+          "strings": 338,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_ntwx_0x10001000.bin",
+          "path": "dumps/api_ntwx_0x10001000.bin",
+          "size": 134417,
+          "md5": "691ceb869f2c5120a139d766242ec0f4",
+          "sha256": "e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de",
+          "pe": false,
+          "role": "W->X region = DECRYPTED PAYLOAD (made executable)",
+          "same_as_packed": false,
+          "strings": 146,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_plan_7000.bin",
+          "path": "dumps/api_plan_7000.bin",
+          "size": 179563,
+          "md5": "0a2fdfae075f7b1f75c66c361b7b3a75",
+          "sha256": "4a70fa518fa190dd0e222e8248527d4eed1d326de7fdf979abeca1ed90a0d678",
+          "pe": false,
+          "role": "memory dump",
+          "same_as_packed": false,
+          "strings": 321,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_region0_0x670000.bin",
+          "path": "dumps/api_region0_0x670000.bin",
+          "size": 176128,
+          "md5": "2740f5927c507bc0df49f3a70d387699",
+          "sha256": "1049554dd71543ea961666920a5d58bc10bc354548044217c5f1556385edbebe",
+          "pe": false,
+          "role": "memory region the malware ALLOCATED (work buffer / staged data)",
+          "same_as_packed": false,
+          "strings": 27,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_region1_0x1e0000_PE.bin",
+          "path": "dumps/api_region1_0x1e0000_PE.bin",
+          "size": 24576,
+          "md5": "b8dd20ffc4818f4d84926096b7fb5a0c",
+          "sha256": "21d45d1d7805dc08a41fc906b59c9bc1282dc71c55c272d512bd600374605b6c",
+          "pe": true,
+          "role": "memory region the malware ALLOCATED (work buffer / staged data)",
+          "same_as_packed": false,
+          "imports": 2,
+          "dll_count": 1,
+          "sections": [],
+          "strings": 27,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_region1_0x1e0000_rebuilt.exe",
+          "path": "dumps/api_region1_0x1e0000_rebuilt.exe",
+          "size": 24576,
+          "md5": "a82f9ad175ac3348c41732ab35a8ae37",
+          "sha256": "21371fb6006741a1e36c5b09a8fcdc6006f71f0dbb7c2e79e29b2db5f357293c",
+          "pe": true,
+          "role": "memory region the malware ALLOCATED (work buffer / staged data)",
+          "same_as_packed": false,
+          "imports": 2,
+          "dll_count": 1,
+          "sections": [],
+          "strings": 27,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_region2_0x6f0000.bin",
+          "path": "dumps/api_region2_0x6f0000.bin",
+          "size": 172032,
+          "md5": "72389e9e2971cd7227dd5aa2543d6c73",
+          "sha256": "2cbbeef1249170a43854962fa5b19fba628470c70beb9ce23e15a0f05cb891f2",
+          "pe": false,
+          "role": "memory region the malware ALLOCATED (work buffer / staged data)",
+          "same_as_packed": false,
+          "strings": 0,
+          "urls": 0,
+          "ips": 0
+        },
+        {
+          "name": "api_wx_0x10001000.bin",
+          "path": "dumps/api_wx_0x10001000.bin",
+          "size": 134417,
+          "md5": "691ceb869f2c5120a139d766242ec0f4",
+          "sha256": "e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de",
+          "pe": false,
+          "role": "W->X region = DECRYPTED PAYLOAD (made executable)",
+          "same_as_packed": false,
+          "strings": 146,
+          "urls": 0,
+          "ips": 0
+        }
+      ]
+    },
+    "dump_analysis": {
+      "dumps": [
+        {
+          "name": "api_wx_0x10001000.bin",
+          "size": 134417,
+          "md5": "691ceb869f2c5120a139d766242ec0f4",
+          "sha256": "e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de",
+          "order": 0,
+          "kind": "executable code",
+          "entropy": 6.552,
+          "code_density": 1.0,
+          "why": "100% of the first bytes decode as valid x86 instructions: looks like shellcode or a code region",
+          "duplicate_of": null
+        },
+        {
+          "name": "api_fullmodule_0x10000000_PE.bin",
+          "size": 217088,
+          "md5": "8e83c0e987ab924696ecbf13b7d380fa",
+          "sha256": "73e2d956e6e712eee57d85215ca81ae5fd4db2cc0802038672c08790c3491029",
+          "order": 1,
+          "kind": "PE image",
+          "entropy": 5.744,
+          "pe": {
+            "machine": "0x14c",
+            "sections": [
+              {
+                "name": ".text",
+                "entropy": 6.55,
+                "raw": 134656
+              },
+              {
+                "name": ".rdata",
+                "entropy": 7.96,
+                "raw": 24576
+              },
+              {
+                "name": ".data",
+                "entropy": 7.56,
+                "raw": 1024
+              },
+              {
+                "name": ".reloc",
+                "entropy": 3.64,
+                "raw": 4096
+              }
+            ],
+            "imports": 7,
+            "dlls": [
+              "KERNEL32.dll",
+              "ADVAPI32.dll"
+            ],
+            "entry_rva": "0x33f3",
+            "image_base": "0x400000",
+            "is_dll": false,
+            "imphash": "eb76140cc31cd615e218e51dbcad0a7b",
+            "packed_looking": true,
+            "high_entropy_sections": [
+              ".rdata",
+              ".data"
+            ]
+          },
+          "why": "valid PE header; 7 imports across 2 DLL(s); still packed-looking (high-entropy section or almost no imports)",
+          "duplicate_of": null
+        },
+        {
+          "name": "api_ntwx_0x10001000.bin",
+          "size": 134417,
+          "md5": "691ceb869f2c5120a139d766242ec0f4",
+          "sha256": "e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de",
+          "order": 2,
+          "kind": "executable code",
+          "entropy": 6.552,
+          "code_density": 1.0,
+          "why": "100% of the first bytes decode as valid x86 instructions: looks like shellcode or a code region",
+          "duplicate_of": "api_wx_0x10001000.bin"
+        },
+        {
+          "name": "api_region0_0x670000.bin",
+          "size": 176128,
+          "md5": "2740f5927c507bc0df49f3a70d387699",
+          "sha256": "1049554dd71543ea961666920a5d58bc10bc354548044217c5f1556385edbebe",
+          "order": 3,
+          "kind": "zero-filled",
+          "entropy": 0.455,
+          "zero_ratio": 0.965,
+          "why": "96% zero bytes: memory the program allocated but had not (yet) filled",
+          "duplicate_of": null
+        },
+        {
+          "name": "api_region1_0x1e0000_PE.bin",
+          "size": 24576,
+          "md5": "b8dd20ffc4818f4d84926096b7fb5a0c",
+          "sha256": "21d45d1d7805dc08a41fc906b59c9bc1282dc71c55c272d512bd600374605b6c",
+          "order": 4,
+          "kind": "PE image",
+          "entropy": 2.503,
+          "pe": {
+            "machine": "0xc7f5",
+            "sections": [],
+            "imports": 2,
+            "dlls": [
+              "KERNEL32.dll"
+            ],
+            "entry_rva": "0x1e97",
+            "image_base": "0x400000",
+            "is_dll": true,
+            "imphash": "d073d1854680ff2ddd038760f5090798",
+            "packed_looking": true,
+            "high_entropy_sections": []
+          },
+          "why": "valid PE header; 2 imports across 1 DLL(s); still packed-looking (high-entropy section or almost no imports)",
+          "duplicate_of": null
+        },
+        {
+          "name": "api_region2_0x6f0000.bin",
+          "size": 172032,
+          "md5": "72389e9e2971cd7227dd5aa2543d6c73",
+          "sha256": "2cbbeef1249170a43854962fa5b19fba628470c70beb9ce23e15a0f05cb891f2",
+          "order": 5,
+          "kind": "zero-filled",
+          "entropy": -0.0,
+          "zero_ratio": 1.0,
+          "why": "100% zero bytes: memory the program allocated but had not (yet) filled",
+          "duplicate_of": null
+        },
+        {
+          "name": "api_plan_7000.bin",
+          "size": 179563,
+          "md5": "0a2fdfae075f7b1f75c66c361b7b3a75",
+          "sha256": "4a70fa518fa190dd0e222e8248527d4eed1d326de7fdf979abeca1ed90a0d678",
+          "order": 6,
+          "kind": "executable code",
+          "entropy": 5.893,
+          "code_density": 1.0,
+          "why": "100% of the first bytes decode as valid x86 instructions: looks like shellcode or a code region",
+          "duplicate_of": null
+        },
+        {
+          "name": "api_fullmodule_0x10000000_rebuilt.exe",
+          "size": 217088,
+          "md5": "9fc8d8fc35a3e4eb385f169eb16d6d16",
+          "sha256": "bc0886d626ba6ca8c60ab997b578c66a92abae0a72fa1a17fbe4cd0570892289",
+          "order": 7,
+          "kind": "PE image",
+          "entropy": 5.744,
+          "pe": {
+            "machine": "0x14c",
+            "sections": [
+              {
+                "name": ".text",
+                "entropy": 6.55,
+                "raw": 134417
+              },
+              {
+                "name": ".rdata",
+                "entropy": 7.98,
+                "raw": 24318
+              },
+              {
+                "name": ".data",
+                "entropy": 7.63,
+                "raw": 1000
+              },
+              {
+                "name": ".reloc",
+                "entropy": 3.88,
+                "raw": 3784
+              }
+            ],
+            "imports": 7,
+            "dlls": [
+              "KERNEL32.dll",
+              "ADVAPI32.dll"
+            ],
+            "entry_rva": "0x33f3",
+            "image_base": "0x10000000",
+            "is_dll": false,
+            "imphash": "eb76140cc31cd615e218e51dbcad0a7b",
+            "packed_looking": true,
+            "high_entropy_sections": [
+              ".rdata",
+              ".data"
+            ]
+          },
+          "why": "valid PE header; 7 imports across 2 DLL(s); still packed-looking (high-entropy section or almost no imports)",
+          "duplicate_of": null
+        },
+        {
+          "name": "api_region1_0x1e0000_rebuilt.exe",
+          "size": 24576,
+          "md5": "a82f9ad175ac3348c41732ab35a8ae37",
+          "sha256": "21371fb6006741a1e36c5b09a8fcdc6006f71f0dbb7c2e79e29b2db5f357293c",
+          "order": 8,
+          "kind": "PE image",
+          "entropy": 2.503,
+          "pe": {
+            "machine": "0xc7f5",
+            "sections": [],
+            "imports": 2,
+            "dlls": [
+              "KERNEL32.dll"
+            ],
+            "entry_rva": "0x1e97",
+            "image_base": "0x1e0000",
+            "is_dll": true,
+            "imphash": "d073d1854680ff2ddd038760f5090798",
+            "packed_looking": true,
+            "high_entropy_sections": []
+          },
+          "why": "valid PE header; 2 imports across 1 DLL(s); still packed-looking (high-entropy section or almost no imports)",
+          "duplicate_of": null
+        }
+      ],
+      "comparisons": [
+        {
+          "from": "api_wx_0x10001000.bin",
+          "to": "api_fullmodule_0x10000000_PE.bin",
+          "byte_match_at_same_offsets": 0.032,
+          "bytes_compared": 134417,
+          "shared_nonzero_blocks": 32,
+          "blocks_a": 32,
+          "blocks_b": 42,
+          "a_inside_b": true,
+          "b_inside_a": false,
+          "identical": false,
+          "entropy_change": -0.81,
+          "new_strings": 93,
+          "new_string_examples": [
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+            "!This program cannot be run in DOS mode.",
+            "AddVectoredExceptionHandler",
+            "89<9@9D9H9L9P9T9X9\\9`9",
+            "4\\4`4d4h4l4p4t4x4|4",
+            "DllUnregisterServer"
+          ],
+          "reading": "api_fullmodule_0x10000000_PE.bin contains all of api_wx_0x10001000.bin (a larger capture of the same memory)"
+        },
+        {
+          "from": "api_fullmodule_0x10000000_PE.bin",
+          "to": "api_region0_0x670000.bin",
+          "byte_match_at_same_offsets": 0.154,
+          "bytes_compared": 176128,
+          "shared_nonzero_blocks": 0,
+          "blocks_a": 42,
+          "blocks_b": 3,
+          "a_inside_b": false,
+          "b_inside_a": false,
+          "identical": false,
+          "entropy_change": -5.29,
+          "new_strings": 8,
+          "new_string_examples": [
+            "GetProcAddress",
+            "VirtualProtect",
+            "LoadLibraryA",
+            "VirtualAlloc",
+            "kernel32.dll",
+            "ntdll.dll"
+          ],
+          "reading": "15% of bytes match at the same offsets; partly related"
+        },
+        {
+          "from": "api_region0_0x670000.bin",
+          "to": "api_region1_0x1e0000_PE.bin",
+          "byte_match_at_same_offsets": 0.639,
+          "bytes_compared": 24576,
+          "shared_nonzero_blocks": 0,
+          "blocks_a": 3,
+          "blocks_b": 6,
+          "a_inside_b": false,
+          "b_inside_a": false,
+          "identical": false,
+          "entropy_change": 2.05,
+          "new_strings": 0,
+          "new_string_examples": [],
+          "reading": "the region was empty in api_region0_0x670000.bin and filled with PE image by api_region1_0x1e0000_PE.bin"
+        },
+        {
+          "from": "api_region1_0x1e0000_PE.bin",
+          "to": "api_region2_0x6f0000.bin",
+          "byte_match_at_same_offsets": 0.748,
+          "bytes_compared": 24576,
+          "shared_nonzero_blocks": 0,
+          "blocks_a": 6,
+          "blocks_b": 0,
+          "a_inside_b": false,
+          "b_inside_a": false,
+          "identical": false,
+          "entropy_change": -2.5,
+          "new_strings": 0,
+          "new_string_examples": [],
+          "reading": "74% of bytes match at the same offsets; partly related"
+        },
+        {
+          "from": "api_region2_0x6f0000.bin",
+          "to": "api_plan_7000.bin",
+          "byte_match_at_same_offsets": 0.278,
+          "bytes_compared": 172032,
+          "shared_nonzero_blocks": 0,
+          "blocks_a": 0,
+          "blocks_b": 35,
+          "a_inside_b": false,
+          "b_inside_a": false,
+          "identical": false,
+          "entropy_change": 5.89,
+          "new_strings": 105,
+          "new_string_examples": [
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+            "AddVectoredExceptionHandler",
+            "89<9@9D9H9L9P9T9X9\\9`9",
+            "4\\4`4d4h4l4p4t4x4|4",
+            "DllUnregisterServer",
+            "OutputDebugStringW"
+          ],
+          "reading": "the region was empty in api_region2_0x6f0000.bin and filled with executable code by api_plan_7000.bin"
+        },
+        {
+          "from": "api_plan_7000.bin",
+          "to": "api_fullmodule_0x10000000_rebuilt.exe",
+          "byte_match_at_same_offsets": 0.101,
+          "bytes_compared": 179563,
+          "shared_nonzero_blocks": 35,
+          "blocks_a": 35,
+          "blocks_b": 42,
+          "a_inside_b": true,
+          "b_inside_a": false,
+          "identical": false,
+          "entropy_change": -0.15,
+          "new_strings": 7,
+          "new_string_examples": [
+            "!This program cannot be run in DOS mode.",
+            "`.rdata",
+            "Rich::0",
+            "77hnTp`",
+            "tnjdj(",
+            ".reloc"
+          ],
+          "reading": "api_fullmodule_0x10000000_rebuilt.exe contains all of api_plan_7000.bin (a larger capture of the same memory)"
+        },
+        {
+          "from": "api_fullmodule_0x10000000_rebuilt.exe",
+          "to": "api_region1_0x1e0000_rebuilt.exe",
+          "byte_match_at_same_offsets": 0.221,
+          "bytes_compared": 24576,
+          "shared_nonzero_blocks": 0,
+          "blocks_a": 42,
+          "blocks_b": 6,
+          "a_inside_b": false,
+          "b_inside_a": false,
+          "identical": false,
+          "entropy_change": -3.24,
+          "new_strings": 8,
+          "new_string_examples": [
+            "GetProcAddress",
+            "VirtualProtect",
+            "LoadLibraryA",
+            "VirtualAlloc",
+            "kernel32.dll",
+            "ntdll.dll"
+          ],
+          "imports_change": "7 -> 2",
+          "same_imphash": false,
+          "reading": "22% of bytes match at the same offsets; partly related"
+        }
+      ],
+      "summary": {
+        "count": 9,
+        "distinct": 8,
+        "payload_candidates": [
+          "api_wx_0x10001000.bin",
+          "api_fullmodule_0x10000000_PE.bin",
+          "api_region1_0x1e0000_PE.bin",
+          "api_plan_7000.bin",
+          "api_fullmodule_0x10000000_rebuilt.exe",
+          "api_region1_0x1e0000_rebuilt.exe"
+        ],
+        "kinds": {
+          "PE image": 4,
+          "executable code": 3,
+          "zero-filled": 2
+        }
+      }
+    },
+    "author_fingerprints": {
+      "api_fullmodule_0x10000000_PE.bin": {
+        "imphash": "eb76140cc31cd615e218e51dbcad0a7b",
+        "rich_hash": "55df3578182b8514a73410fe2fc7c63c",
+        "timestamp": 1586998044,
+        "section_names": ".text,.rdata,.data,.reloc",
+        "signed": false
+      },
+      "api_fullmodule_0x10000000_rebuilt.exe": {
+        "imphash": "eb76140cc31cd615e218e51dbcad0a7b",
+        "rich_hash": "55df3578182b8514a73410fe2fc7c63c",
+        "timestamp": 1586998044,
+        "section_names": ".text,.rdata,.data,.reloc",
+        "signed": false
+      },
+      "api_region1_0x1e0000_PE.bin": {
+        "imphash": "d073d1854680ff2ddd038760f5090798",
+        "rich_hash": "495b4d33a880c7a6330c31b841e8035f",
+        "timestamp": 1587645413,
+        "section_names": "",
+        "signed": false
+      },
+      "api_region1_0x1e0000_rebuilt.exe": {
+        "imphash": "d073d1854680ff2ddd038760f5090798",
+        "rich_hash": "495b4d33a880c7a6330c31b841e8035f",
+        "timestamp": 1587645413,
+        "section_names": "",
+        "signed": false
+      },
+      "packed sample": {
+        "imphash": "7ebef1081a372c6e6f289d7c633f4f3a",
+        "rich_hash": "a08e6e4e71a4e9438fd0f44de4641ca7",
+        "timestamp": 1587693851,
+        "section_names": ".text,.rdata,.data,.text1,.rsrc,.reloc",
+        "signed": false
+      }
+    },
+    "author_links": {
+      "links": [
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_fullmodule_0x10000000_PE.bin",
+          "other_label": "api_fullmodule_0x10000000_PE.bin",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_fullmodule_0x10000000_PE.bin",
+          "other_label": "api_fullmodule_0x10000000_rebuilt.exe",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_fullmodule_0x10000000_rebuilt.exe",
+          "other_label": "api_fullmodule_0x10000000_PE.bin",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_fullmodule_0x10000000_rebuilt.exe",
+          "other_label": "api_fullmodule_0x10000000_rebuilt.exe",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_region1_0x1e0000_PE.bin",
+          "other_label": "api_region1_0x1e0000_PE.bin",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_region1_0x1e0000_PE.bin",
+          "other_label": "api_region1_0x1e0000_rebuilt.exe",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_region1_0x1e0000_rebuilt.exe",
+          "other_label": "api_region1_0x1e0000_PE.bin",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "api_region1_0x1e0000_rebuilt.exe",
+          "other_label": "api_region1_0x1e0000_rebuilt.exe",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp"
+          ],
+          "strength": "strong lead"
+        },
+        {
+          "with_case": "710ada92-23df-45ee-82e1-84e402c7901a_dridex",
+          "label": "packed sample",
+          "other_label": "packed sample",
+          "shared": [
+            "imphash",
+            "rich_hash",
+            "timestamp",
+            "section_names"
+          ],
+          "strength": "strong lead"
+        }
+      ]
+    },
+    "guest_deobfuscation": {
+      "sample": "C:\\nemesis\\178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+      "die": {
+        "available": false,
+        "error": "Cannot find: C:\\nemesis\\178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe\n"
+      },
+      "dotnet": false,
+      "obfuscator": null,
+      "deobfuscated": null,
+      "de4dot_log": null,
+      "note": "not a .NET assembly; use the native unpacking path (x64dbg/Ghidra)"
+    },
+    "attribution": {
+      "available": true,
+      "compile_timestamp": {
+        "raw": 1587693851,
+        "utc": "2020-04-24 02:04:11 UTC",
+        "suspicious": null
+      },
+      "linker_version": "14.1",
+      "rich_header": {
+        "xor_key": "0xebf94557",
+        "entries": [
+          {
+            "prodid": 157,
+            "build": 40219,
+            "count": 383
+          },
+          {
+            "prodid": 258,
+            "build": 23918,
+            "count": 334
+          },
+          {
+            "prodid": 124,
+            "build": 50727,
+            "count": 505
+          },
+          {
+            "prodid": 204,
+            "build": 50727,
+            "count": 85
+          },
+          {
+            "prodid": 154,
+            "build": 40219,
+            "count": 166
+          },
+          {
+            "prodid": 258,
+            "build": 24213,
+            "count": 40
+          },
+          {
+            "prodid": 260,
+            "build": 23026,
+            "count": 179
+          },
+          {
+            "prodid": 221,
+            "build": 40629,
+            "count": 178
+          },
+          {
+            "prodid": 223,
+            "build": 31101,
+            "count": 375
+          },
+          {
+            "prodid": 204,
+            "build": 61030,
+            "count": 90
+          },
+          {
+            "prodid": 257,
+            "build": 23026,
+            "count": 171
+          },
+          {
+            "prodid": 258,
+            "build": 23026,
+            "count": 394
+          },
+          {
+            "prodid": 156,
+            "build": 30319,
+            "count": 495
+          },
+          {
+            "prodid": 258,
+            "build": 24213,
+            "count": 146
+          },
+          {
+            "prodid": 225,
+            "build": 31101,
+            "count": 228
+          },
+          {
+            "prodid": 255,
+            "build": 25834,
+            "count": 76
+          },
+          {
+            "prodid": 224,
+            "build": 40629,
+            "count": 69
+          },
+          {
+            "prodid": 131,
+            "build": 30729,
+            "count": 472
+          },
+          {
+            "prodid": 205,
+            "build": 60610,
+            "count": 430
+          },
+          {
+            "prodid": 145,
+            "build": 21022,
+            "count": 14
+          }
+        ],
+        "toolchain_builds": [
+          21005,
+          21022,
+          23026,
+          23918,
+          24210,
+          24213,
+          24215,
+          25834,
+          30319,
+          30501,
+          30729,
+          31101,
+          40219,
+          40629,
+          50727,
+          60610,
+          61030
+        ]
+      },
+      "version_info": {
+        "Comments": "nProtect KeyCrypt Program Database DLL",
+        "CompanyName": "INCA Internet Co., Ltd.",
+        "FileDescription": "nProtect KeyCrypt Program Database DLL",
+        "FileVersion": "2003, 10, 1, 1",
+        "InternalName": "npkpdb.dll",
+        "LegalCopyright": "Copyright (C) INCA Internet. 2000-2003",
+        "OriginalFilename": "npkpdb.dll",
+        "ProductName": "nProtect KeyCrypt Program Database DLL",
+        "ProductVersion": "4, 0, 0, 0"
+      },
+      "resource_languages": [
+        {
+          "id": "0x12",
+          "name": "unknown"
+        }
+      ],
+      "summary": [
+        "Compiled 2020-04-24 02:04:11 UTC",
+        "Version info: CompanyName=INCA Internet Co., Ltd., LegalCopyright=Copyright (C) INCA Internet. 2000-2003, Comments=nProtect KeyCrypt Program Database DLL, OriginalFilename=npkpdb.dll, ProductName=nProtect KeyCrypt Program Database DLL, InternalName=npkpdb.dll",
+        "MSVC toolchain build IDs [21005, 21022, 23026, 23918, 24210, 24213, 24215, 25834, 30319, 30501, 30729, 31101, 40219, 40629, 50727, 60610, 61030] (Rich-header fingerprint for same-author clustering)"
+      ]
+    },
+    "classification": {
+      "primary": "loader/packer",
+      "secondary": [],
+      "families": [
+        {
+          "family": "loader/packer",
+          "score": 8,
+          "evidence": [
+            "allocates memory then flips it W->X (self-unpacking)",
+            "makes written memory executable at runtime",
+            "resolves APIs at runtime via GetProcAddress/LoadLibrary"
+          ]
+        }
+      ],
+      "persistence": [],
+      "summary": "Behaves as a **loader/packer**."
+    },
+    "crypto_recovery": {
+      "status": "none",
+      "schemes": [],
+      "notes": [
+        "No clear crypto scheme recovered from static evidence."
+      ],
+      "generated": [],
+      "readme": null
+    },
+    "detonation": {
+      "started": "2026-10-21T16:22:18",
+      "duration_s": 90,
+      "completed": true,
+      "artifacts_dir": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/artifacts/run",
+      "network": [],
+      "registry_changes": [],
+      "files_dropped": [],
+      "processes": [],
+      "benign": false,
+      "memory_dump": null,
+      "carved_pes": [
+        {
+          "name": "10000000.malware.exe",
+          "size": 165376,
+          "urls": [],
+          "ips": [],
+          "registry": [],
+          "suspicious_keywords": []
+        },
+        {
+          "name": "510000.dll",
+          "size": 9728,
+          "urls": [],
+          "ips": [],
+          "registry": [],
+          "suspicious_keywords": []
+        },
+        {
+          "name": "10000000.malware.exe",
+          "size": 165376,
+          "urls": [],
+          "ips": [],
+          "registry": [],
+          "suspicious_keywords": []
+        },
+        {
+          "name": "510000.dll",
+          "size": 9728,
+          "urls": [],
+          "ips": [],
+          "registry": [],
+          "suspicious_keywords": []
+        }
+      ]
+    },
+    "malware_category": {
+      "primary": "no category supported by the evidence",
+      "categories": [],
+      "other_families": [
+        "loader/packer"
+      ],
+      "note": "Counts from live breakpoints are lower bounds. 'present in code' is a lead, not proof of behaviour. A loader/packer stage often hides the real category: analyse the unpacked payload for it."
+    },
+    "file_crypto": {
+      "constants": [],
+      "pairs": 0,
+      "results": [],
+      "verdict": "No file-encryption call was observed in this run.",
+      "key_candidates": 0
+    },
+    "ai_assessment_unpacked": {
+      "stage": "unpacked",
+      "likely_family": "unknown",
+      "family_confidence": "low",
+      "capabilities": [
+        "timing check (rdtsc) at 0x25afe",
+        "anti-disassembly (int3 sled) at 0x1012"
+      ],
+      "config_leads": [],
+      "url_leads": [],
+      "encrypted_regions": [
+        {
+          "where": ".text1",
+          "likely": "encrypted",
+          "evidence": "high entropy 7.96"
+        },
+        {
+          "where": ".rdata",
+          "likely": "compressed",
+          "evidence": "high entropy 7.982"
+        },
+        {
+          "where": ".data",
+          "likely": "compressed",
+          "evidence": "high entropy 7.631"
+        }
+      ],
+      "notable_strings": [
+        "nProtect KeyCrypt Program Database DLL (potential misdirection)"
+      ],
+      "packer_assessment": "not packed, but contains high-entropy sections suggesting encryption/compression",
+      "anti_analysis_expected": [
+        "anti-disassembly (int3 sled)",
+        "timing check (rdtsc)"
+      ],
+      "dynamic_strategy": [
+        "Breakpoint on rdtsc to monitor timing checks",
+        "Monitor memory writes in .text1 section",
+        "Dump memory after decryption routine in .text1"
+      ],
+      "reasoning": "The presence of high-entropy sections (.text1, .rdata, .data) suggests encryption or compression, despite the file not being packed. Anti-analysis techniques such as rdtsc timing checks and int3 sleds indicate attempts to evade debugging. The nProtect KeyCrypt string may be a false flag, as the file's behavior does not align with legitimate software.",
+      "_ai_model": "gpt-4o"
+    },
+    "proof_of_compromise": {
+      "sample": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+      "sha256": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1",
+      "size": 212992,
+      "arch": "x86",
+      "type": "PE32",
+      "compiler": "Microsoft Visual C/C++ 19.00.24215",
+      "verdict": {
+        "label": "MALICIOUS",
+        "confidence": 65,
+        "basis": "dynamic-confirmed",
+        "dynamic": true,
+        "payload_captured": true,
+        "static_score": 0,
+        "dynamic_score": 65,
+        "evidence": [
+          "CONFIRMED self-unpacking at runtime (payload captured + verified) (+30)",
+          "runtime: memory made executable after being written (2 W->X event(s)) \u2014 the unpacking moment (+10)",
+          "behavioral classification: loader/packer (loader/packer) (+25)"
+        ],
+        "static_evidence": [],
+        "dynamic_evidence": [
+          "CONFIRMED self-unpacking at runtime (payload captured + verified) (+30)",
+          "runtime: memory made executable after being written (2 W->X event(s)) \u2014 the unpacking moment (+10)",
+          "behavioral classification: loader/packer (loader/packer) (+25)"
+        ],
+        "caveats": []
+      },
+      "packing": {
+        "likely_packed": false,
+        "confidence": 10,
+        "packer": null,
+        "reasons": [
+          "uncommon high-entropy section '.text1' (7.96)"
+        ]
+      },
+      "capabilities": {},
+      "attack_techniques": [
+        "T1027.002 Software Packing",
+        "T1140 Deobfuscate/Decode Files or Information",
+        "T1620 Reflective Code Loading"
+      ],
+      "iocs": {
+        "urls": [],
+        "ips": [],
+        "registry": [],
+        "paths": [],
+        "suspicious_strings": []
+      },
+      "anomalies": [],
+      "deobfuscation": {
+        "sample": "C:\\nemesis\\178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+        "die": {
+          "available": false,
+          "error": "Cannot find: C:\\nemesis\\178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe\n"
+        },
+        "dotnet": false,
+        "obfuscator": null,
+        "deobfuscated": null,
+        "de4dot_log": null,
+        "note": "not a .NET assembly; use the native unpacking path (x64dbg/Ghidra)"
+      },
+      "detonation": {
+        "started": "2026-10-21T16:22:18",
+        "duration_s": 90,
+        "completed": true,
+        "artifacts_dir": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/artifacts/run",
+        "network": [],
+        "registry_changes": [],
+        "files_dropped": [],
+        "processes": [],
+        "benign": false,
+        "memory_dump": null,
+        "carved_pes": [
+          {
+            "name": "10000000.malware.exe",
+            "size": 165376,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "suspicious_keywords": []
+          },
+          {
+            "name": "510000.dll",
+            "size": 9728,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "suspicious_keywords": []
+          },
+          {
+            "name": "10000000.malware.exe",
+            "size": 165376,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "suspicious_keywords": []
+          },
+          {
+            "name": "510000.dll",
+            "size": 9728,
+            "urls": [],
+            "ips": [],
+            "registry": [],
+            "suspicious_keywords": []
+          }
+        ]
+      },
+      "dynamic_hints": [],
+      "completeness": "static + dynamic + detonation",
+      "pending": [],
+      "attribution": {
+        "available": true,
+        "compile_timestamp": {
+          "raw": 1587693851,
+          "utc": "2020-04-24 02:04:11 UTC",
+          "suspicious": null
+        },
+        "linker_version": "14.1",
+        "rich_header": {
+          "xor_key": "0xebf94557",
+          "entries": [
+            {
+              "prodid": 157,
+              "build": 40219,
+              "count": 383
+            },
+            {
+              "prodid": 258,
+              "build": 23918,
+              "count": 334
+            },
+            {
+              "prodid": 124,
+              "build": 50727,
+              "count": 505
+            },
+            {
+              "prodid": 204,
+              "build": 50727,
+              "count": 85
+            },
+            {
+              "prodid": 154,
+              "build": 40219,
+              "count": 166
+            },
+            {
+              "prodid": 258,
+              "build": 24213,
+              "count": 40
+            },
+            {
+              "prodid": 260,
+              "build": 23026,
+              "count": 179
+            },
+            {
+              "prodid": 221,
+              "build": 40629,
+              "count": 178
+            },
+            {
+              "prodid": 223,
+              "build": 31101,
+              "count": 375
+            },
+            {
+              "prodid": 204,
+              "build": 61030,
+              "count": 90
+            },
+            {
+              "prodid": 257,
+              "build": 23026,
+              "count": 171
+            },
+            {
+              "prodid": 258,
+              "build": 23026,
+              "count": 394
+            },
+            {
+              "prodid": 156,
+              "build": 30319,
+              "count": 495
+            },
+            {
+              "prodid": 258,
+              "build": 24213,
+              "count": 146
+            },
+            {
+              "prodid": 225,
+              "build": 31101,
+              "count": 228
+            },
+            {
+              "prodid": 255,
+              "build": 25834,
+              "count": 76
+            },
+            {
+              "prodid": 224,
+              "build": 40629,
+              "count": 69
+            },
+            {
+              "prodid": 131,
+              "build": 30729,
+              "count": 472
+            },
+            {
+              "prodid": 205,
+              "build": 60610,
+              "count": 430
+            },
+            {
+              "prodid": 145,
+              "build": 21022,
+              "count": 14
+            }
+          ],
+          "toolchain_builds": [
+            21005,
+            21022,
+            23026,
+            23918,
+            24210,
+            24213,
+            24215,
+            25834,
+            30319,
+            30501,
+            30729,
+            31101,
+            40219,
+            40629,
+            50727,
+            60610,
+            61030
+          ]
+        },
+        "version_info": {
+          "Comments": "nProtect KeyCrypt Program Database DLL",
+          "CompanyName": "INCA Internet Co., Ltd.",
+          "FileDescription": "nProtect KeyCrypt Program Database DLL",
+          "FileVersion": "2003, 10, 1, 1",
+          "InternalName": "npkpdb.dll",
+          "LegalCopyright": "Copyright (C) INCA Internet. 2000-2003",
+          "OriginalFilename": "npkpdb.dll",
+          "ProductName": "nProtect KeyCrypt Program Database DLL",
+          "ProductVersion": "4, 0, 0, 0"
+        },
+        "resource_languages": [
+          {
+            "id": "0x12",
+            "name": "unknown"
+          }
+        ],
+        "summary": [
+          "Compiled 2020-04-24 02:04:11 UTC",
+          "Version info: CompanyName=INCA Internet Co., Ltd., LegalCopyright=Copyright (C) INCA Internet. 2000-2003, Comments=nProtect KeyCrypt Program Database DLL, OriginalFilename=npkpdb.dll, ProductName=nProtect KeyCrypt Program Database DLL, InternalName=npkpdb.dll",
+          "MSVC toolchain build IDs [21005, 21022, 23026, 23918, 24210, 24213, 24215, 25834, 30319, 30501, 30729, 31101, 40219, 40629, 50727, 60610, 61030] (Rich-header fingerprint for same-author clustering)"
+        ]
+      },
+      "classification": {
+        "primary": "loader/packer",
+        "secondary": [],
+        "families": [
+          {
+            "family": "loader/packer",
+            "score": 8,
+            "evidence": [
+              "allocates memory then flips it W->X (self-unpacking)",
+              "makes written memory executable at runtime",
+              "resolves APIs at runtime via GetProcAddress/LoadLibrary"
+            ]
+          }
+        ],
+        "persistence": [],
+        "summary": "Behaves as a **loader/packer**."
+      },
+      "verify_unpack": {
+        "verdict": "CONFIRMED_UNPACKED",
+        "confidence": 60,
+        "reasons": [
+          "debugger captured the payload at 2 write->execute flip(s) (direct unpack evidence)",
+          "dump parses as a valid PE image"
+        ],
+        "metrics": {
+          "imports_packed": 17,
+          "imports_dumped": 7,
+          "packer_sections_packed": [],
+          "ep_entropy_packed": 5.55,
+          "ep_entropy_dumped": 6.55,
+          "new_urls": 0,
+          "new_ips": 0,
+          "dump_is_valid_pe": true
+        },
+        "breakdown": [
+          {
+            "signal": "W->X decryption captured",
+            "points": 50,
+            "max": 50,
+            "detail": "debugger captured the payload at 2 write->execute flip(s) (direct unpack evidence)"
+          },
+          {
+            "signal": "import table grew",
+            "points": 0,
+            "max": 35,
+            "detail": "imports 17 -> 7 (no growth)"
+          },
+          {
+            "signal": "packer sections removed",
+            "points": 0,
+            "max": 25,
+            "detail": "no packer section names in either"
+          },
+          {
+            "signal": "entropy dropped",
+            "points": 0,
+            "max": 20,
+            "detail": "entry-point entropy 5.55 -> 6.55 (no significant drop)"
+          },
+          {
+            "signal": "hidden IOCs revealed",
+            "points": 0,
+            "max": 25,
+            "detail": "no new network IOCs in the dump (may be encrypted config)"
+          },
+          {
+            "signal": "valid PE image",
+            "points": 10,
+            "max": 10,
+            "detail": "dump parses as a valid PE image"
+          }
+        ],
+        "compared": {
+          "packed": {
+            "name": "packed sample",
+            "size": 212992,
+            "md5": "6a8401448a5bd2b540850f811b20a66d",
+            "sha256": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1"
+          },
+          "unpacked": {
+            "name": "reconstructed: api_fullmodule_0x10000000_rebuilt.exe",
+            "size": 217088,
+            "md5": "9fc8d8fc35a3e4eb385f169eb16d6d16",
+            "sha256": "bc0886d626ba6ca8c60ab997b578c66a92abae0a72fa1a17fbe4cd0570892289"
+          }
+        },
+        "note": "Compare these MD5s against your file set \u2014 a packer that writes copies of itself will show the SAME hash across dropped files."
+      },
+      "crypto_recovery": {
+        "status": "none",
+        "schemes": [],
+        "notes": [
+          "No clear crypto scheme recovered from static evidence."
+        ],
+        "generated": [],
+        "readme": null
+      }
+    },
+    "tool_audit": {
+      "total_calls": 405,
+      "ok": 386,
+      "errors": 19,
+      "total_ms": 218420,
+      "by_tool": {
+        "pefile": {
+          "calls": 6,
+          "errors": 0,
+          "ms": 173
+        },
+        "diec": {
+          "calls": 6,
+          "errors": 0,
+          "ms": 5779
+        },
+        "x64dbg.module_get_main": {
+          "calls": 5,
+          "errors": 1,
+          "ms": 63
+        },
+        "ssh.run": {
+          "calls": 39,
+          "errors": 2,
+          "ms": 119185
+        },
+        "x64dbg.debug_stop": {
+          "calls": 2,
+          "errors": 0,
+          "ms": 26
+        },
+        "scp.push": {
+          "calls": 3,
+          "errors": 0,
+          "ms": 5289
+        },
+        "x64dbg.debug_init": {
+          "calls": 1,
+          "errors": 0,
+          "ms": 17
+        },
+        "x64dbg.debug_get_state": {
+          "calls": 99,
+          "errors": 0,
+          "ms": 1394
+        },
+        "x64dbg.debug_pause": {
+          "calls": 1,
+          "errors": 0,
+          "ms": 571
+        },
+        "x64dbg.script_execute": {
+          "calls": 87,
+          "errors": 0,
+          "ms": 1383
+        },
+        "x64dbg.module_get_exports": {
+          "calls": 18,
+          "errors": 15,
+          "ms": 1185
+        },
+        "x64dbg.eval_expression": {
+          "calls": 113,
+          "errors": 0,
+          "ms": 1500
+        },
+        "x64dbg.breakpoint_set": {
+          "calls": 3,
+          "errors": 0,
+          "ms": 44
+        },
+        "x64dbg.register_get_batch": {
+          "calls": 3,
+          "errors": 0,
+          "ms": 45
+        },
+        "x64dbg.memory_read": {
+          "calls": 3,
+          "errors": 1,
+          "ms": 42
+        },
+        "x64dbg.dump_memory_region": {
+          "calls": 6,
+          "errors": 0,
+          "ms": 162
+        },
+        "x64dbg.dump_module": {
+          "calls": 1,
+          "errors": 0,
+          "ms": 39
+        },
+        "scp.pull": {
+          "calls": 8,
+          "errors": 0,
+          "ms": 73230
+        },
+        "de4dot": {
+          "calls": 1,
+          "errors": 0,
+          "ms": 8293
+        }
+      },
+      "failures": [
+        {
+          "seq": 3,
+          "tool": "x64dbg.module_get_main",
+          "error": "{'code': -32000, 'message': 'Failed to get main module info'}"
+        },
+        {
+          "seq": 6,
+          "tool": "ssh.run",
+          "error": "ssh returncode=128"
+        },
+        {
+          "seq": 131,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: mpr.dll'}"
+        },
+        {
+          "seq": 132,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: netapi32.dll'}"
+        },
+        {
+          "seq": 133,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: urlmon.dll'}"
+        },
+        {
+          "seq": 134,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: winhttp.dll'}"
+        },
+        {
+          "seq": 135,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: ws2_32.dll'}"
+        },
+        {
+          "seq": 192,
+          "tool": "x64dbg.memory_read",
+          "error": "{'code': -32010, 'message': 'Memory not readable at address: 0x001E30F2'}"
+        },
+        {
+          "seq": 213,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: mpr.dll'}"
+        },
+        {
+          "seq": 214,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: netapi32.dll'}"
+        },
+        {
+          "seq": 215,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: urlmon.dll'}"
+        },
+        {
+          "seq": 216,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: winhttp.dll'}"
+        },
+        {
+          "seq": 217,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: ws2_32.dll'}"
+        },
+        {
+          "seq": 302,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: mpr.dll'}"
+        },
+        {
+          "seq": 303,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: netapi32.dll'}"
+        },
+        {
+          "seq": 304,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: urlmon.dll'}"
+        },
+        {
+          "seq": 305,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: winhttp.dll'}"
+        },
+        {
+          "seq": 306,
+          "tool": "x64dbg.module_get_exports",
+          "error": "{'code': -32603, 'message': 'Module not found: ws2_32.dll'}"
+        },
+        {
+          "seq": 372,
+          "tool": "ssh.run",
+          "error": "ssh returncode=1"
+        }
+      ]
+    },
+    "intel_package": {
+      "dir": "cases/ce45ac67-2b3c-455d-9c12-e11b0a0c5059_dridex/intel",
+      "suricata_rules": 0,
+      "sigma_rules": 0,
+      "yara": [
+        {
+          "stage": "packed",
+          "file": "178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1.exe",
+          "rule": "nemesis_loader_packer_packed_178ba564",
+          "note": "12 strings, needs 6",
+          "written": true,
+          "self_match": true,
+          "goodware_false_positives": "0/28"
+        },
+        {
+          "stage": "unpacked",
+          "file": "api_fullmodule_0x10000000_rebuilt.exe",
+          "rule": "nemesis_loader_packer_unpacked_bc0886d6",
+          "note": "12 strings, needs 6",
+          "written": true,
+          "self_match": true,
+          "goodware_false_positives": "0/28"
+        },
+        {
+          "stage": "unpacked",
+          "file": "api_ntwx_0x10001000.bin",
+          "rule": "nemesis_loader_packer_unpacked_e7414cb2",
+          "note": "withheld: only 1 distinctive strings in this stage (need >= 4) \u2014 a rule would be noisy",
+          "written": false
+        }
+      ],
+      "stix": true,
+      "indicators": 35,
+      "excluded": 0,
+      "availability": {
+        "file hashes": {
+          "count": 9,
+          "note": "sample + unpacked payloads"
+        },
+        "network (C2 / download)": {
+          "count": 0,
+          "high_confidence": 0,
+          "note": "none recovered with confidence: the C2 configuration is probably encrypted at rest and decrypted only when it beacons \u2014 run the detonation phase (FakeNet capture) or recover the config key"
+        },
+        "host artefacts": {
+          "count": 0,
+          "note": "none observed in the code recovered so far"
+        },
+        "build / attribution": {
+          "count": 5,
+          "note": ""
+        }
+      },
+      "errors": [],
+      "high_confidence": 30
+    },
+    "procmon_summary": {
+      "available": true,
+      "events": 438198,
+      "pids": [
+        "4772"
+      ],
+      "image": "malware.exe",
+      "operations": [
+        [
+          "RegQueryValue",
+          172357
+        ],
+        [
+          "RegQueryKey",
+          119333
+        ],
+        [
+          "RegOpenKey",
+          66419
+        ],
+        [
+          "RegCloseKey",
+          39802
+        ],
+        [
+          "RegSetInfoKey",
+          39796
+        ],
+        [
+          "Process Profiling",
+          116
+        ],
+        [
+          "CreateFile",
+          73
+        ],
+        [
+          "QuerySecurityFile",
+          57
+        ],
+        [
+          "IRP_MJ_CLOSE",
+          52
+        ],
+        [
+          "CloseFile",
+          50
+        ],
+        [
+          "Load Image",
+          32
+        ],
+        [
+          "QueryOpen",
+          28
+        ]
+      ],
+      "busiest_registry": [
+        [
+          "HKLM",
+          119314
+        ],
+        [
+          "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Cryptography\\Defaults\\Provider\\Microsoft Enhanced RSA and AES Cryptographic Provider",
+          79530
+        ],
+        [
+          "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Cryptography\\Defaults\\Provider Types\\Type 024",
+          66276
+        ],
+        [
+          "HKLM\\SOFTWARE\\Microsoft\\Cryptography",
+          53020
+        ],
+        [
+          "HKLM\\Software\\Microsoft\\Cryptography",
+          13255
+        ],
+        [
+          "HKLM\\Software\\WOW6432Node\\Microsoft\\Cryptography\\Offload",
+          13255
+        ],
+        [
+          "HKLM\\Software\\WOW6432Node\\Microsoft\\Cryptography\\DESHashSessionKeyBackward",
+          13255
+        ],
+        [
+          "HKLM\\System\\CurrentControlSet\\Control\\Session Manager",
+          19
+        ],
+        [
+          "HKU\\.DEFAULT",
+          18
+        ],
+        [
+          "HKLM\\System\\CurrentControlSet\\Control\\Lsa\\FipsAlgorithmPolicy",
+          7
+        ],
+        [
+          "HKLM\\SOFTWARE\\Microsoft\\Ole",
+          6
+        ],
+        [
+          "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager",
+          5
+        ]
+      ],
+      "writes": [],
+      "reads": [
+        [
+          "C:\\nemesis\\run\\malware.exe",
+          4
+        ],
+        [
+          "C:\\Windows\\apppatch\\sysmain.sdb",
+          3
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\pdh.dll",
+          3
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\wininet.dll",
+          3
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\imm32.dll",
+          3
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\kern32.ll",
+          3
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\cryptsp.dll",
+          3
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\rsaenh.dll",
+          3
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\cryptbase.dll",
+          3
+        ],
+        [
+          "C:\\Windows",
+          2
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\apphelp.dll",
+          2
+        ],
+        [
+          "C:\\Windows\\SysWOW64\\ole32.dll",
+          2
+        ]
+      ],
+      "processes_created": [],
+      "network": []
+    }
+  },
+  "hints": [],
+  "state": "new",
+  "updated": "2026-10-21T16:28:23"
+}

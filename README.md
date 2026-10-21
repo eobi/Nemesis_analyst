@@ -50,6 +50,9 @@ A real run on a packed **Dridex** sample (the full PDF is in [docs/examples/drid
 The engine caught the self-unpacking at the write→execute flip, rebuilt the hidden payload into a valid PE,
 and clustered the author's build fingerprints — without the on-disk file ever revealing them.
 
+The full output of this run — reports, detection package and machine-readable `case.json` — is in
+[docs/examples/dridex](docs/examples/dridex).
+
 ## Setup
 
 You need a Mac or Linux host and a Windows VM you can throw away.

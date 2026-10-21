@@ -179,6 +179,9 @@ def run(guest_sample, target_name="default", detonate=False):
     case.add("tool_audit", ta.summary())
     audit.activate(None)
     (case.dir / "METHODOLOGY.md").write_text(reproducibility.generate(case.data))
+    from nanalyst import pdf as _pdf
+    for _n in ("REPORT.md", "METHODOLOGY.md", "proof_of_compromise.md"):
+        _pdf.md_to_pdf(str(case.dir / _n))
     manifest = case.write_manifest()
     rl.log("pipeline", "DONE")
 

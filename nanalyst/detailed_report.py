@@ -100,8 +100,26 @@ def generate(case: dict) -> str:
                      f"(vs {pe.get('import_func_count')} in the packed view).")
         vf = st.get("verify_unpack")
         if vf:
-            L.append(f"- **Unpack verification: {vf['verdict']} ({vf['confidence']}/100)** — "
-                     + "; ".join(vf.get("reasons", [])[:4]))
+            L.append("")
+            L.append(f"**Unpack verification: {vf['verdict']} ({vf['confidence']}/100)**")
+            cmp = vf.get("compared", {})
+            if cmp:
+                L.append("")
+                L.append("| File | Size | MD5 | SHA-256 |")
+                L.append("|---|---|---|---|")
+                for role, d in (("packed (input)", cmp.get("packed", {})),
+                                ("unpacked (output)", cmp.get("unpacked", {}))):
+                    L.append(f"| {role}: {d.get('name','?')} | {d.get('size') or '?'} | "
+                             f"`{d.get('md5') or '?'}` | `{d.get('sha256') or '?'}` |")
+                if vf.get("note"):
+                    L.append(f"> {vf['note']}")
+            if vf.get("breakdown"):
+                L.append("")
+                L.append("Score breakdown (why this verdict):")
+                L.append("| Signal | Points | Detail |")
+                L.append("|---|---|---|")
+                for b in vf["breakdown"]:
+                    L.append(f"| {b['signal']} | {b['points']}/{b['max']} | {b['detail']} |")
         mu = st.get("memory_static_unpack")
         if mu:
             L.append(f"- Re-static of the clean dump: {len(mu.get('urls',[]))} URL(s), "

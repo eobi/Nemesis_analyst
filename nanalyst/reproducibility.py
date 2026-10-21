@@ -102,6 +102,33 @@ def generate(case: dict) -> str:
     L.append("```")
     L.append("")
 
+    # ---------- step-by-step execution narrative (ASLR-relative) ----------
+    at = st.get("api_trace", {}) or {}
+    if at.get("trace"):
+        tri = st.get("triage", {})
+        base = (tri.get("pe", {}) or {}).get("image_base")
+        L.append("## 4b. Step-by-step execution (what the sample did, in order)")
+        L.append("Addresses differ every run (ASLR) and across machines, so each step is given "
+                 "**relative** to the module base (RVA = address − base) and by **call order / "
+                 "arguments**, which are invariant. Follow these in any debugger regardless of where "
+                 "the module loads.")
+        L.append("")
+        counts = {}
+        for i, ev in enumerate(at["trace"][:40], 1):
+            api = ev.get("api", "").split(".")[-1]
+            counts[api] = counts.get(api, 0) + 1
+            a = ev.get("args", {})
+            # describe with sizes/flags (ASLR-invariant) + RVA where in-module
+            desc = ", ".join(f"{k}={v}" for k, v in list(a.items())[:3])
+            cap = ev.get("capture") or {}
+            note = f"  → {cap['note']}" if cap.get("note") else ""
+            L.append(f"{i}. **{counts[api]}× {api}** — {desc}{note}")
+        if base:
+            L.append("")
+            L.append(f"*(module preferred base `{hex(base)}`; at runtime read the real base from the "
+                     "memory map and add the RVA. The payload W→X flip + its size are the anchor.)*")
+        L.append("")
+
     # ---------- dynamic reproduction (the literal debugger steps) ----------
     if du:
         L.append("## 5. Reproduce the DYNAMIC unpack (x64dbg, by hand)")

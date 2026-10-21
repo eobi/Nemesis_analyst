@@ -318,13 +318,15 @@ def build_all(case: dict, out_dir: Path, log=print) -> dict:
             generated.append(g)
             log(f"[decryptor] {sc['algo']} conf={sc['confidence']} "
                 f"{'RUNNABLE' if g['runnable'] else 'template'} -> {g['path']}")
-    # a README tying it together
-    if generated:
+    # always leave a README when ANY crypto was detected (even if only a template /
+    # CryptoAPI note), so the decryptor/ folder explains what to do — never empty.
+    readme = None
+    if det["schemes"]:
         _write_readme(det, generated, out_dir)
-    return {"status": "generated" if generated else "none",
-            "schemes": det["schemes"], "notes": det["notes"],
-            "generated": generated,
-            "readme": str(out_dir / "README.md") if generated else None}
+        readme = str(out_dir / "README.md")
+    status = "generated" if generated else ("crypto_found_no_decryptor" if det["schemes"] else "none")
+    return {"status": status, "schemes": det["schemes"], "notes": det["notes"],
+            "generated": generated, "readme": readme}
 
 
 def _write_readme(det: dict, generated: list, out_dir: Path) -> None:

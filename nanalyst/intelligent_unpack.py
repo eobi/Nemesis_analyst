@@ -165,29 +165,23 @@ class Engine:
         MCP debug_run/debug_run_to primitives behave inconsistently here)."""
         return self.call("script_execute", {"command": c})
 
-    def step(self, cmd, pre_eip, target=None, secs=15):
-        """Issue a native run command (async) and wait for the debuggee to settle,
-        avoiding the stale-state race: first wait for execution to actually leave
-        pre_eip (or go 'running'), THEN wait for it to stop. Returns (status, eip):
+    def step(self, cmd, pre_eip, target=None, secs=12):
+        """Issue a native run command (async) and return as soon as the debuggee is
+        PAUSED at a NEW address (or EXITED). Lean single poll-loop — returns in ~0.1s
+        on a fast breakpoint hit instead of waiting out a fixed window. (status, eip):
         AT_TARGET / PAUSED / EXITED / TIMEOUT."""
         import time
         target = (target or "").lower()
         pre = (pre_eip or "").lower()
         self.cmd(cmd)
-        moved = False
-        for _ in range(int(secs * 2)):
+        deadline = time.time() + secs
+        while time.time() < deadline:
             e, state = self.eip()
             if state == "stopped":
                 return "EXITED", e
-            if state == "running":
-                moved = True
-            if state == "paused" and e != pre:
-                moved = True
-            if moved and state == "paused":
-                if target and e == target:
-                    return "AT_TARGET", e
-                return "PAUSED", e
-            time.sleep(0.4)
+            if state == "paused" and e and e != pre:
+                return ("AT_TARGET", e) if (target and e == target) else ("PAUSED", e)
+            time.sleep(0.12)
         return "TIMEOUT", self.eip()[0]
 
     def run_to(self, target_hex, max_events=40):
@@ -377,16 +371,22 @@ class Engine:
                      "size": mm.get("size", 0) if isinstance(mm, dict) else 0}
         self.log(f"[api-trace] at entry {entry} (reached={reached}, "
                  f"{len(self._exports)} exports mapped)")
+        if not reached or "VirtualAlloc" not in self._exports:
+            self.log("[api-trace] WARNING: entry not reached / kernel32 not mapped — the debuggee "
+                     "is in a degraded state (often after many restarts). RELOAD the sample in "
+                     "x32dbg (Debug > Restart or reopen) for a clean run; results below are partial.")
         self.neutralize_antidebug()
-        addr2spec = {}
+        addr2spec, sym2addrs = {}, {}
         for sp in API_SPEC:
             for a in self.api_addrs(sp["sym"]):
                 self.cmd(f"bp {a}"); addr2spec[str(a).lower()] = sp
+                sym2addrs.setdefault(sp["sym"], []).append(a)
         exits = {}
         for fn in EXIT_APIS:
             for a in self.api_addrs(fn):
                 self.cmd(f"bp {a}"); exits[str(a).lower()] = fn
         self.log(f"[api-trace] armed {len(addr2spec)} API breakpoints + {len(exits)} exit-guards; running")
+        CAP = 20
         trace, counts, last = [], {}, None
         for _ in range(max_events):
             cmd = "erun" if (last and last == self.eip()[0]) else "run"
@@ -403,6 +403,13 @@ class Engine:
             if not sp:
                 continue
             counts[sp["sym"]] = counts.get(sp["sym"], 0) + 1
+            # a chatty API (e.g. GetProcAddress, called hundreds of times) would dominate
+            # run time — once past the cap, DELETE its breakpoint so it stops being hit.
+            if counts[sp["sym"]] >= CAP:
+                for a in sym2addrs.get(sp["sym"], []):
+                    self.cmd(f"bpc {a}")
+                self.log(f"[api-trace] {sp['sym']} hit {CAP}x — breakpoint removed (noise cap)")
+                continue
             args = self.read_args(sp, arch)
             shown = ", ".join(f"{k}={hex(v) if isinstance(v, int) else v}"
                               for k, v in list(args.items())[:4])

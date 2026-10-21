@@ -30,6 +30,9 @@ def main():
     ap.add_argument("sample", help="local path to the (packed) sample, for case keying")
     ap.add_argument("--module", default=None, help="module name in x64dbg (default: main)")
     ap.add_argument("--target", default="default")
+    ap.add_argument("--detonate", action="store_true",
+                    help="after unpack, fully DETONATE (FakeNet + Procmon + Regshot). "
+                         "This EXECUTES the malware and dirties the VM — revert to clean-baseline after.")
     a = ap.parse_args()
 
     t = load(a.target)
@@ -212,8 +215,49 @@ def main():
             bm = memstatic.analyze(best["out"]); case.add("memory_static_reconstructed", bm)
             print(f"[rebuild] BEST: {Path(best['out']).name} -> {best['imports']} imports; "
                   f"re-static: {len(bm['urls'])} URLs, {len(bm['ips'])} IPs")
+            # authoritative verification: packed vs the reconstructed PE (IAT resolved)
+            v2 = verify.verify_unpack(packed_triage, bt, None, bm,
+                                      dumped_label=f"reconstructed: {Path(best['out']).name}")
+            case.add("verify_unpack", v2)
+            print(f"[verify] {v2['verdict']} ({v2['confidence']}/100) vs reconstructed PE")
+            for b in v2.get("breakdown", []):
+                print(f"           [{b['points']}/{b['max']}] {b['detail']}")
         except Exception as exc:
             print(f"[rebuild] (re-triage failed: {exc})")
+
+    # --- label every dump so it's clear what each is (not all are payloads) ---
+    def _dump_role(n):
+        if n.startswith("unpacked_dump"): return "OEP module dump (dump_module)"
+        if "fullmodule" in n: return "full module at W->X flip (-> reconstruct)"
+        if "_wx_" in n or "_ntwx_" in n: return "W->X region = DECRYPTED PAYLOAD (made executable)"
+        if "keyblob" in n: return "crypto KEY BLOB (CryptImportKey)"
+        if n.startswith("api_region"): return "memory region the malware ALLOCATED (work buffer / staged data)"
+        if "wsrc" in n or "writeSrc" in n: return "buffer written into another process"
+        if "decomp" in n: return "decompression output (RtlDecompressBuffer)"
+        if n.startswith("hintdump"): return "target of an indirect call/jmp (register pointer)"
+        if n.endswith("_rebuilt.exe"): return "RECONSTRUCTED valid PE (imports/IAT fixed)"
+        return "memory dump"
+    # rename MZ dumps so the filename itself flags them as installable PE images
+    for df in list(case.dumps_dir.glob("*.bin")):
+        try:
+            if open(df, "rb").read(2) == b"MZ" and "_PE" not in df.name:
+                df.rename(df.with_name(df.stem + "_PE.bin"))
+        except Exception:
+            pass
+    dumps_idx = ["# Dumps — what each file is", "",
+                 "Not every dump is a payload. The engine dumps every memory region the sample "
+                 "allocated/protected/targeted so nothing is missed. Files tagged **PE** carry an "
+                 "MZ header (installable/mappable images); the rest are code/data regions.", "",
+                 "| File | Size | PE? | Role |", "|---|---|---|---|"]
+    for df in sorted(case.dumps_dir.glob("*")):
+        if not df.is_file() or df.name == "DUMPS.md":
+            continue
+        try:
+            mz = open(df, "rb").read(2) == b"MZ"
+        except Exception:
+            mz = False
+        dumps_idx.append(f"| `{df.name}` | {df.stat().st_size:,} | {'**PE**' if mz else '-'} | {_dump_role(df.name)} |")
+    (case.dumps_dir / "DUMPS.md").write_text("\n".join(dumps_idx))
 
     # author / build recon on the packed sample
     attr = attribution.analyze(a.sample); case.add("attribution", attr)
@@ -234,18 +278,51 @@ def main():
     for n in dec.get("notes", []):
         print(f"[crypto] {n}")
 
+    # --- optional final phase: full detonation (behavioral capture for ProcDOT) ---
+    if a.detonate:
+        from nanalyst import detonate as det
+        print("\n[detonate] FINAL phase: executing the malware with FakeNet + Procmon + Regshot")
+        print("[detonate] (this DIRTIES the VM — revert to clean-baseline afterwards)")
+        g3 = t.guest()
+        g3.run('cmd /c "if not exist C:\\nemesis mkdir C:\\nemesis"', timeout=30)
+        staged = r"C:\nemesis\det_sample.exe"
+        if g3.push(a.sample, staged):
+            dres = det.run(g3, staged, rl, None, artifacts_dir=case.artifacts_dir)
+            case.add("detonation", dres)
+            print(f"[detonate] artifacts -> {case.artifacts_dir}")
+            print("[detonate] Procmon CSV ready for ProcDOT: "
+                  f"{case.artifacts_dir}/run/pm.csv (import into ProcDOT for the visual graph)")
+            # re-classify with behavioral evidence now included
+            case.add("classification", classifier.classify(case.data))
+        else:
+            print("[detonate] could not stage the sample on the guest; skipped")
+
     case.add("tool_audit", ta.summary())
     audit.activate(None)
-    # full analyst report + reproducible methodology
+    # full analyst report + reproducible methodology (+ PDF versions)
     (case.dir / "REPORT.md").write_text(detailed_report.generate(case.data))
     (case.dir / "METHODOLOGY.md").write_text(reproducibility.generate(case.data))
+    from nanalyst import pdf as _pdf
+    for name in ("REPORT.md", "METHODOLOGY.md", "proof_of_compromise.md"):
+        outp = _pdf.md_to_pdf(str(case.dir / name))
+        if outp:
+            print(f"[pdf] {name} -> {Path(outp).name}")
     manifest = case.write_manifest()
     rl.log("unpack", "DONE")
     print(f"\n[analysis folder] {case.dir}")
     print(f"[REPORT] {case.dir / 'REPORT.md'}")
     print(f"[METHODOLOGY] {case.dir / 'METHODOLOGY.md'}  (deterministic repro steps)")
     print(f"[manifest] {manifest}")
+    print(f"[dumps index] {case.dumps_dir / 'DUMPS.md'}")
     print("[tool audit]\n" + ta.render())
+    # analysis ran the sample under the debugger (and detonation if requested) — the VM
+    # is now dirty. Reset before the next sample.
+    print("\n" + "=" * 68)
+    print("  ANALYSIS COMPLETE. The VM has executed malware code and is DIRTY.")
+    print("  -> Shut down the VM, then WIPE/REVERT to the clean baseline:")
+    print("     ./ReverseEngineeringMalwareAnalysis/revert-clean.sh")
+    print("  Then boot fresh for the next sample. Never reuse a dirty VM.")
+    print("=" * 68)
     return 0
 
 

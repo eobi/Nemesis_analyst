@@ -54,6 +54,13 @@ def generate(case: dict) -> str:
                        f"**{len(mem.get('ips',[]))} IP(s)** not visible in static analysis.")
     L += summary
     L.append("")
+    # why the verdict got its score — every point is justified
+    vev = (poc.get("verdict", {}) or {}).get("evidence", [])
+    if vev:
+        L.append(f"**Why the verdict is {v.get('label','?')} ({v.get('confidence','?')}/100):**")
+        for e in vev:
+            L.append(f"- {e}")
+        L.append("")
 
     # ---------- author / build reconnaissance ----------
     attr = st.get("attribution", {}) or {}
@@ -86,18 +93,16 @@ def generate(case: dict) -> str:
     du = st.get("dynamic_unpack")
     if du:
         L.append("## 1c. Dynamic unpack (x64dbg, debugger-driven)")
-        L.append(f"- Detected OEP: `{du.get('oep')}` | reached OEP: **{du.get('reached_oep')}** "
-                 f"| dump mode: {du.get('dump_mode')}")
+        if du.get("payload_captured"):
+            n = len(du.get("wx_flips", []) or [])
+            L.append(f"- **Payload captured: YES** — the packer decrypted its code in memory and "
+                     f"flipped it writable→executable ({n} W→X flip event(s)); we dumped it at that "
+                     "instant (see the Memory dumps section).")
+        else:
+            L.append("- Payload captured: no W→X flip observed in this run.")
         if du.get("api_hits"):
             L.append(f"- Unpack API hit counts: "
-                     f"{', '.join(f'{k}×{v}' for k,v in du['api_hits'].items())} "
-                     "(real unpack often happens on the Nth call).")
-        dtri = st.get("triage_dumped")
-        if dtri:
-            L.append(f"- Dumped PE after OEP-aware reconstruction: **{dtri.get('filetype')}**, "
-                     f"packer `{dtri.get('packing',{}).get('packer') or 'none'}`, "
-                     f"{dtri.get('pe',{}).get('import_func_count')} imports "
-                     f"(vs {pe.get('import_func_count')} in the packed view).")
+                     f"{', '.join(f'{k}×{v}' for k,v in du['api_hits'].items())}.")
         vf = st.get("verify_unpack")
         if vf:
             L.append("")
@@ -283,7 +288,49 @@ def generate(case: dict) -> str:
     L.append("")
 
     # ---------- dynamic: debugger/memory ----------
-    L.append("## 3. Dynamic analysis (A) — memory dump + re-static")
+    # ---------- dumps: hashes, comparison, re-static (the solid artifact table) ----------
+    dm = st.get("dumps_manifest", {}) or {}
+    if dm.get("dumps"):
+        L.append("## 3. Memory dumps — hashes, comparison & re-static")
+        L.append(f"Packed input: MD5 `{dm.get('packed_md5')}` · SHA-256 `{dm.get('packed_sha256')}` "
+                 f"· {dm.get('packed_imports', '?')} imports.")
+        L.append("")
+        L.append("Every dumped region, with its own hashes (copy to compare / VirusTotal) and what "
+                 "re-static found in it:")
+        L.append("")
+        L.append("| Dump (link) | Size | PE | Imports | re-static URLs/IPs | Same as packed? | MD5 | SHA-256 |")
+        L.append("|---|---|---|---|---|---|---|---|")
+        for r in dm["dumps"]:
+            imp = r.get("imports", "-") if r.get("pe") else "-"
+            same = "YES ⚠" if r.get("same_as_packed") else "no"
+            ui = f"{r.get('urls', 0)}/{r.get('ips', 0)}"
+            L.append(f"| [`{r['name']}`]({r['path']}) | {r['size']:,} | {'yes' if r['pe'] else '-'} | "
+                     f"{imp} | {ui} | {same} | `{r['md5']}` | `{r['sha256']}` |")
+        L.append("")
+        L.append("**Packed vs reconstructed — did unpacking change the file?**")
+        L.append("| | Packed input | Reconstructed payload |")
+        L.append("|---|---|---|")
+        rtri = st.get("triage_reconstructed", {}) or {}
+        rpe = rtri.get("pe", {}) or {}
+        vfc = (st.get("verify_unpack", {}) or {}).get("compared", {})
+        L.append(f"| MD5 | `{dm.get('packed_md5')}` | `{(vfc.get('unpacked') or {}).get('md5','-')}` |")
+        L.append(f"| Imports | {dm.get('packed_imports','?')} | {rpe.get('import_func_count','-')} |")
+        L.append(f"| Sections | {[s['name'] for s in (pe.get('sections') or [])]} | "
+                 f"{[s['name'] for s in (rpe.get('sections') or [])]} |")
+        L.append(f"| Different file? | — | "
+                 f"{'NO (identical)' if (vfc.get('unpacked') or {}).get('md5')==dm.get('packed_md5') else 'YES (distinct content)'} |")
+        rm = st.get("memory_static_reconstructed", {}) or {}
+        if rm.get("urls") or rm.get("ips"):
+            L.append("")
+            L.append("Re-static of the reconstructed payload revealed:")
+            for u in rm.get("urls", [])[:15]:
+                L.append(f"- URL `{u}`")
+            for ip in rm.get("ips", [])[:15]:
+                L.append(f"- IP `{ip}`")
+        L.append("")
+
+    # ---------- legacy detonation memory dump (if --detonate ran) ----------
+    L.append("## 3b. Detonation memory dump + re-static")
     if det and det.get("memory_dump"):
         L.append(f"- Process memory dumped during execution: `{det['memory_dump']}` "
                  f"({mem.get('dump_size',0)//1024} KB, {mem.get('string_count',0):,} strings extracted)")

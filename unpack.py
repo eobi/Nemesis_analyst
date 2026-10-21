@@ -223,20 +223,49 @@ def main():
                 df.rename(df.with_name(df.stem + "_PE.bin"))
         except Exception:
             pass
-    dumps_idx = ["# Dumps — what each file is", "",
-                 "Not every dump is a payload. The engine dumps every memory region the sample "
-                 "allocated/protected/targeted so nothing is missed. Files tagged **PE** carry an "
-                 "MZ header (installable/mappable images); the rest are code/data regions.", "",
-                 "| File | Size | PE? | Role |", "|---|---|---|---|"]
+    # build a full dumps manifest: per-dump hashes + PE imports + re-static IOCs, and a
+    # comparison vs the packed input (same file? more APIs? what did re-static reveal?)
+    import hashlib
+    packed_h = packed_triage.get("hashes", {}) or {}
+    packed_md5 = packed_h.get("md5")
+    manifest = []
     for df in sorted(case.dumps_dir.glob("*")):
-        if not df.is_file() or df.name == "DUMPS.md":
+        if not df.is_file() or df.name in ("DUMPS.md",):
             continue
+        data = df.read_bytes()
+        mz = data[:2] == b"MZ"
+        rec = {"name": df.name, "path": f"dumps/{df.name}", "size": len(data),
+               "md5": hashlib.md5(data).hexdigest(), "sha256": hashlib.sha256(data).hexdigest(),
+               "pe": mz, "role": _dump_role(df.name),
+               "same_as_packed": hashlib.md5(data).hexdigest() == packed_md5}
+        if mz:
+            try:
+                tri = triage(str(df)); pe = tri.get("pe", {}) or {}
+                rec["imports"] = pe.get("import_func_count")
+                rec["dll_count"] = pe.get("import_dll_count")
+                rec["sections"] = [s["name"] for s in pe.get("sections", [])]
+            except Exception:
+                pass
         try:
-            mz = open(df, "rb").read(2) == b"MZ"
+            m = memstatic.analyze(str(df))
+            rec["strings"] = m.get("string_count"); rec["urls"] = len(m.get("urls", []))
+            rec["ips"] = len(m.get("ips", []))
         except Exception:
-            mz = False
-        dumps_idx.append(f"| `{df.name}` | {df.stat().st_size:,} | {'**PE**' if mz else '-'} | {_dump_role(df.name)} |")
-    (case.dumps_dir / "DUMPS.md").write_text("\n".join(dumps_idx))
+            pass
+        manifest.append(rec)
+    case.add("dumps_manifest", {"packed_md5": packed_md5,
+                                "packed_sha256": packed_h.get("sha256"),
+                                "packed_imports": (packed_triage.get("pe", {}) or {}).get("import_func_count"),
+                                "dumps": manifest})
+    # human index file
+    idx = ["# Dumps — what each file is", "",
+           "Each memory region the sample allocated/protected/targeted is dumped so nothing is "
+           "missed. **PE** = carries an MZ header (installable/mappable image).", "",
+           "| File | Size | PE? | MD5 | Role |", "|---|---|---|---|---|"]
+    for r in manifest:
+        idx.append(f"| `{r['name']}` | {r['size']:,} | {'**PE**' if r['pe'] else '-'} | "
+                   f"`{r['md5']}` | {r['role']} |")
+    (case.dumps_dir / "DUMPS.md").write_text("\n".join(idx))
 
     # author / build recon on the packed sample
     attr = attribution.analyze(a.sample); case.add("attribution", attr)

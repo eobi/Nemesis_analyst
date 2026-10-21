@@ -22,8 +22,11 @@ ATTACK_MAP = {
 }
 
 
-def _verdict(triage: dict, static: dict) -> dict:
-    """Heuristic maliciousness assessment with an evidence list."""
+def _verdict(triage: dict, static: dict, stg: dict | None = None) -> dict:
+    """Maliciousness assessment with an evidence list. Factors in DYNAMIC findings
+    (what the sample actually did at runtime), not just static imports — a packed
+    sample is static-blind, so the dynamic trace is where the verdict comes from."""
+    stg = stg or {}
     score = 0
     evidence = []
     caps = triage.get("pe", {}).get("suspicious_apis", {})
@@ -63,14 +66,42 @@ def _verdict(triage: dict, static: dict) -> dict:
         if static.get("function_count", 0) <= 2 and pk.get("likely_packed"):
             evidence.append("static analysis blind (few functions) — payload hidden until unpacked")
 
+    # ---- DYNAMIC evidence (the decisive part for packed malware) ----
+    dynamic = False
+    vf = stg.get("verify_unpack", {}) or {}
+    if vf.get("verdict") == "CONFIRMED_UNPACKED":
+        dynamic = True; score += 30
+        evidence.append("CONFIRMED self-unpacking at runtime (payload decrypted + captured at W->X flip)")
+    cls = stg.get("classification", {}) or {}
+    fams = [f["family"] for f in cls.get("families", [])]
+    if any(f in ("loader/packer", "injector", "dropper", "banker", "ransomware",
+                 "infostealer", "bot", "keylogger", "worm") for f in fams):
+        dynamic = True; score += 25
+        evidence.append(f"behavioral classification: {cls.get('primary')} "
+                        f"({', '.join(fams[:3])})")
+    at = stg.get("api_trace", {}) or {}
+    cnt = at.get("counts", {}) or {}
+    if cnt:
+        dynamic = True
+        if any("Alloc" in k for k in cnt) and any("Protect" in k for k in cnt):
+            score += 10; evidence.append("runtime: allocates memory then changes it to executable (unpacking)")
+        gp = sum(v for k, v in cnt.items() if "GetProcAddress" in k)
+        if gp >= 10:
+            score += 10; evidence.append(f"runtime: resolves {gp}+ APIs dynamically (hides imports)")
+    cr = stg.get("crypto_recovery", {}) or {}
+    if cr.get("schemes"):
+        score += 10; evidence.append(f"runtime cryptography in use ({cr['schemes'][0]['algo']})")
+
     score = min(score, 100)
     if score >= 60:
-        label = "LIKELY MALICIOUS"
+        label = "MALICIOUS"
     elif score >= 30:
+        label = "LIKELY MALICIOUS" if dynamic else "SUSPICIOUS"
+    elif score > 0:
         label = "SUSPICIOUS"
     else:
-        label = "INCONCLUSIVE (static only)"
-    return {"label": label, "confidence": score, "evidence": evidence}
+        label = "INCONCLUSIVE"
+    return {"label": label, "confidence": score, "evidence": evidence, "dynamic": dynamic}
 
 
 def _iocs(triage: dict, static: dict) -> dict:
@@ -84,13 +115,38 @@ def _iocs(triage: dict, static: dict) -> dict:
     }
 
 
-def _attack(triage: dict, static: dict) -> list[str]:
+def _attack(triage: dict, static: dict, stg: dict | None = None) -> list[str]:
+    stg = stg or {}
     caps = set(triage.get("pe", {}).get("suspicious_apis", {}).keys())
     techniques: list[str] = []
     for cap in caps:
         for t in ATTACK_MAP.get(cap, []):
             if t not in techniques:
                 techniques.append(t)
+
+    # map observed DYNAMIC behavior to techniques (the real evidence for packed malware)
+    def tech(t):
+        if t not in techniques:
+            techniques.append(t)
+    if (stg.get("verify_unpack", {}) or {}).get("verdict") == "CONFIRMED_UNPACKED":
+        tech("T1027.002 Software Packing"); tech("T1140 Deobfuscate/Decode Files or Information")
+    at = stg.get("api_trace", {}) or {}
+    cnt = at.get("counts", {}) or {}
+    names = {ev.get("capture", {}).get("note", "") for ev in at.get("trace", [])}
+    if any("Alloc" in k for k in cnt) and any("Protect" in k for k in cnt):
+        tech("T1620 Reflective Code Loading")
+    if sum(v for k, v in cnt.items() if "GetProcAddress" in k) >= 10:
+        tech("T1027 Obfuscated Files or Information")
+    blob = " ".join(names)
+    if "GetComputerName" in blob or "GetUserName" in blob:
+        tech("T1082 System Information Discovery"); tech("T1033 System Owner/User Discovery")
+    if "AddVectoredExceptionHandler" in blob or "OutputDebugString" in blob:
+        tech("T1622 Debugger Evasion")
+    if any("remote" in f["family"] for f in (stg.get("classification", {}) or {}).get("families", [])) \
+       or "injector" in [f["family"] for f in (stg.get("classification", {}) or {}).get("families", [])]:
+        tech("T1055 Process Injection")
+    if (stg.get("crypto_recovery", {}) or {}).get("schemes"):
+        tech("T1573 Encrypted Channel / config")
     return techniques
 
 
@@ -102,13 +158,13 @@ def generate(case: dict) -> dict:
     deob = stg.get("guest_deobfuscation", {})
     dynamic = stg.get("detonation", {})
 
-    verdict = _verdict(triage, static)
+    verdict = _verdict(triage, static, stg)
     iocs = _iocs(triage, static)
-    attack = _attack(triage, static)
+    attack = _attack(triage, static, stg)
 
-    completeness = "static-only"
-    if dynamic:
-        completeness = "static + dynamic"
+    ran_dynamic = any(k in stg for k in ("api_trace", "dynamic_unpack", "hint_dumps"))
+    completeness = ("static + dynamic + detonation" if dynamic else
+                    "static + dynamic" if ran_dynamic else "static-only")
 
     pending = []
     if not deob and triage.get("pe", {}):

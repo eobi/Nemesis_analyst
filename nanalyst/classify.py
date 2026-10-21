@@ -228,7 +228,9 @@ def classify(case: dict) -> dict:
                 if kind == "api" else (needle.lower() in blob)
             if hit:
                 scores[fam] = scores.get(fam, 0) + weight
-                reasons.setdefault(fam, []).append(f"{why} ({needle})")
+                # show the matched token in parens, but hide internal synthetic markers
+                tag = "" if needle.startswith("__") else f" ({needle})"
+                reasons.setdefault(fam, []).append(f"{why}{tag}")
 
     persistence = []
     for kind, needle, why in PERSIST:

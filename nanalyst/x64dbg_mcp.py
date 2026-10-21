@@ -21,7 +21,7 @@ from .vm.target import Target
 
 
 class X64dbgMCP:
-    def __init__(self, target: Target, remote_port: int = 3000, local_port: int = 3000):
+    def __init__(self, target: Target, remote_port: int = 3000, local_port: int = 13300):
         self.target = target
         self.remote_port = remote_port
         self.local_port = local_port

@@ -32,6 +32,10 @@ ALGOS = {
     "xor":    (r"\bxor\b", []),
     "rsa":    (r"\brsa\b|-----begin [a-z ]*key|publickey|rsaencrypt", []),
     "base64": (r"base64|frombase64|tobase64", []),
+    # Windows CryptoAPI / CSP (CryptoSPI CP* exports) — algorithm set at runtime
+    "cryptoapi": (r"cryptacquirecontext|cryptencrypt|cryptdecrypt|cryptderivekey|"
+                  r"cpencrypt|cpdecrypt|cpderivekey|cpgenkey|cpimportkey|bcryptencrypt",
+                  ["CryptEncrypt", "CryptDecrypt", "CryptAcquireContext", "BCryptEncrypt"]),
 }
 ASYMMETRIC = {"rsa"}
 
@@ -55,6 +59,14 @@ def _gather_text(case: dict) -> tuple[str, set, bytes]:
     apis.update(gh.get("suspicious_apis", []) or [])
     for k in ("urls", "ips", "registry", "suspicious"):
         text_parts += (gh.get("strings", {}) or {}).get(k, []) or []
+
+    # dynamic API trace — APIs called + names resolved at runtime (e.g. CPDecrypt)
+    at = st.get("api_trace", {}) or {}
+    for ev in at.get("trace", []):
+        apis.add(ev.get("api", "").split(".")[-1])
+        note = (ev.get("capture") or {}).get("note", "")
+        if note:
+            text_parts.append(note)
 
     fw = st.get("framework_extract", {}) or {}
     if fw.get("status") == "extracted":
@@ -129,6 +141,11 @@ def detect_crypto(case: dict) -> dict:
             "asymmetric": asym, "recoverable": recoverable,
         })
 
+    if any(s["algo"] == "cryptoapi" for s in schemes):
+        notes.append("Windows CryptoAPI/CSP in use (CryptAcquireContext / CP* exports) — the "
+                     "algorithm + key are set at runtime. Recover the key by breaking on "
+                     "CPImportKey / CPDeriveKey / CryptImportKey and reading the key blob, then "
+                     "decrypt with that algorithm.")
     if any(s["asymmetric"] for s in schemes):
         notes.append("RSA/asymmetric detected: files are NOT recoverable offline without the "
                      "attacker's PRIVATE key (or an implementation flaw / leaked key).")

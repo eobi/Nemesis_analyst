@@ -17,7 +17,7 @@ from nanalyst.runlog import RunLog, Checklist
 from nanalyst.triage import triage
 from nanalyst.tools import ghidra_worker
 from nanalyst import (proof, guest_static, detailed_report, classify, framework_extract,
-                      audit, attribution, verify, decryptor)
+                      audit, attribution, verify, decryptor, reproducibility)
 from nanalyst.report import render, render_static
 from nanalyst.vm.target import load as load_target
 import shutil
@@ -178,6 +178,7 @@ def run(guest_sample, target_name="default", detonate=False):
     # persist the tool-audit summary into the case + end the ledger + index the folder
     case.add("tool_audit", ta.summary())
     audit.activate(None)
+    (case.dir / "METHODOLOGY.md").write_text(reproducibility.generate(case.data))
     manifest = case.write_manifest()
     rl.log("pipeline", "DONE")
 

@@ -18,9 +18,9 @@ import base64
 import time
 from pathlib import Path
 
-PROCMON = r"C:\Users\Administrator\Desktop\Procmon64.exe"
+PROCMON = r"C:\Tools\Procmon64.exe"
 TSHARK = r"C:\Wireshark36\tshark.exe"
-FAKENET_DIR = r"C:\Users\Public\Desktop\fakenet3.5"
+FAKENET_DIR = r"C:\Tools\fakenet"
 WORK = r"C:\nemesis\run"
 
 PERSIST_KEYS = [

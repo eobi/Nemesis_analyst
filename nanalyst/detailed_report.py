@@ -112,6 +112,66 @@ def generate(case: dict) -> str:
                 L.append(f"  - IP `{ip}`")
         L.append("")
 
+    # ---------- hint-driven dumps (indirect-transfer sites) ----------
+    hd = st.get("hint_dumps", {}) or {}
+    if hd.get("results"):
+        L.append("## 1d. Hint-driven dumps (static anomaly -> dynamic extraction)")
+        L.append("Static analysis flagged indirect control transfers (`call reg` / push-ret) "
+                 "where a register points at code the packer wrote. The debugger broke at each "
+                 "site, resolved the register, and dumped the memory it pointed to:")
+        L.append("")
+        L.append("| Site | Instr | Target | Classification | IOCs | Dump |")
+        L.append("|---|---|---|---|---|---|")
+        for r in hd["results"]:
+            ioc = r.get("ioc", {}) or {}
+            iocs = f"{len(ioc.get('urls',[]))}U/{len(ioc.get('ips',[]))}I" if ioc else "-"
+            dump = "yes" if r.get("dump_path") else ("not reached" if not r.get("reached") else "no")
+            L.append(f"| `{r['site']}` | {r.get('detail')} | `{r.get('target')}` | "
+                     f"{r.get('classification') or '-'} | {iocs} | {dump} |")
+        L.append("")
+
+    # ---------- API-arsenal trace ----------
+    at = st.get("api_trace", {}) or {}
+    if at.get("trace"):
+        L.append("## 1e. API trace (live dynamic behavior)")
+        counts = at.get("counts", {})
+        L.append("Watched the P1/P2 API arsenal during execution. Call counts:")
+        L.append("| API | Calls |")
+        L.append("|---|---|")
+        for api, n in sorted(counts.items(), key=lambda kv: -kv[1]):
+            L.append(f"| `{api}` | {n} |")
+        L.append("")
+        L.append("Notable calls (with captured arguments / memory):")
+        for ev in at["trace"][:30]:
+            args = ", ".join(f"{k}={v}" for k, v in list((ev.get('args') or {}).items())[:4])
+            cap = ev.get("capture") or {}
+            note = f" — {cap['note']}" if cap.get("note") else ""
+            dumped = " [dumped]" if cap.get("dump") or cap.get("local_dump") else ""
+            L.append(f"- `{ev['api']}`({args}){note}{dumped}")
+        if at.get("watched_regions"):
+            L.append("")
+            L.append(f"Allocated regions watched: {', '.join('`%s`' % r for r in at['watched_regions'][:12])}")
+        L.append("")
+
+    # ---------- PE reconstruction ----------
+    pr = st.get("pe_reconstruction", {}) or {}
+    if pr.get("best"):
+        b = pr["best"]
+        L.append("## 1f. PE reconstruction (memory dump -> valid PE, IAT rebuilt)")
+        L.append("Memory dumps were rebuilt into valid PEs (align raw<->virtual + fix ImageBase), "
+                 "so the import table/IAT resolve:")
+        L.append(f"- Best image: `{__import__('pathlib').Path(b['out']).name}` from `{b.get('source')}` "
+                 f"-> **{b['imports']} imports across {b['dll_count']} DLLs**")
+        L.append(f"- DLLs: {', '.join('`%s`' % d for d in b.get('dlls', [])[:14])}")
+        rtri = st.get("triage_reconstructed", {})
+        if rtri:
+            caps = (rtri.get("pe", {}) or {}).get("suspicious_apis", {})
+            if caps:
+                L.append("- Capabilities (from rebuilt imports):")
+                for cat, apis_ in caps.items():
+                    L.append(f"  - **{cat}**: {', '.join(apis_[:10])}")
+        L.append("")
+
     # ---------- per-tool static ----------
     L.append("## 2. Static analysis — what each tool discovered")
 

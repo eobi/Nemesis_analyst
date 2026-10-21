@@ -64,6 +64,23 @@ class Case:
             self.data["state"] = state
         self.save()
 
+    def load(self) -> "Case":
+        """Merge an existing case.json (prior stages + hints) into this case, so a
+        later tool (e.g. the dynamic unpacker) can build on earlier static results
+        instead of overwriting them."""
+        p = self.dir / "case.json"
+        if p.exists():
+            try:
+                prior = json.loads(p.read_text())
+                self.data["stages"].update(prior.get("stages", {}) or {})
+                have = {id(h): h for h in self.data["hints"]}
+                for h in prior.get("hints", []) or []:
+                    if h not in self.data["hints"]:
+                        self.data["hints"].append(h)
+            except Exception:
+                pass
+        return self
+
     def save(self) -> None:
         (self.dir / "case.json").write_text(json.dumps(self.data, indent=2))
 

@@ -88,6 +88,20 @@ RULES = {
         ("api", "CreateRemoteThread", 2, "injects into another process"),
         ("api", "WriteProcessMemory", 2, "writes into another process"),
     ],
+    "loader/packer": [
+        ("kw", "__self_unpacking__", 4, "allocates memory then flips it W->X (self-unpacking)"),
+        ("kw", "__wx_selfmodify__", 2, "makes written memory executable at runtime"),
+        ("kw", "__dynamic_api_resolution__", 2, "resolves APIs at runtime via GetProcAddress/LoadLibrary"),
+        ("api", "RtlDecompressBuffer", 2, "decompresses an embedded buffer"),
+        ("kw", "cryptoapi", 1, "decrypts data at runtime (CryptoAPI/CSP)"),
+    ],
+    "injector": [
+        ("kw", "__process_injection__", 4, "writes + executes code in another process"),
+        ("api", "WriteProcessMemory", 3, "writes into another process"),
+        ("api", "VirtualAllocEx", 3, "allocates memory in another process"),
+        ("api", "CreateRemoteThread", 3, "starts a thread in another process"),
+        ("api", "NtWriteVirtualMemory", 3, "native cross-process write"),
+    ],
     "worm": [
         ("api", "WNetAddConnection", 3, "maps network shares to spread"),
         ("kw", "\\\\.\\pipe", 1, "named-pipe lateral movement"),
@@ -133,6 +147,59 @@ def _haystacks(case: dict):
         for k in ("urls", "ips", "registry", "suspicious_keywords", "emails"):
             kw += (memstage or {}).get(k, []) or []
     mem = det.get("memory_static", {}) or {}
+
+    # API-arsenal trace — the behaviors observed live (alloc/protect/write/spawn/...)
+    at = st.get("api_trace", {}) or {}
+    has_wx = has_alloc = has_remote = has_resolve = False
+    for ev in at.get("trace", []):
+        api = ev.get("api", "").split(".")[-1]
+        apis.add(api)                                       # e.g. VirtualAllocEx
+        cat = ev.get("cat", "")
+        if cat == "alloc":
+            has_alloc = True
+        if cat in ("alloc-remote", "write-remote", "thread-remote"):
+            has_remote = True
+        if cat in ("load", "resolve"):
+            has_resolve = True
+        cap = ev.get("capture") or {}
+        note = cap.get("note", "")
+        if note:
+            kw.append(note)
+            if "W->X" in note or "w->x" in note.lower():
+                has_wx = True
+        for k in ("urls", "ips", "registry", "suspicious_keywords"):
+            kw += (cap.get("ioc", {}) or {}).get(k, []) or []
+    # synthetic behavioral markers so the family rules can fire on dynamic evidence
+    if has_wx:
+        kw.append("__wx_selfmodify__")
+    if has_wx and has_alloc:
+        kw.append("__self_unpacking__")
+    if has_remote:
+        kw.append("__process_injection__")
+    if has_resolve:
+        kw.append("__dynamic_api_resolution__")
+    # IOCs from the dumped payload regions (decoded memory)
+    for rd in at.get("region_dumps", []):
+        for k in ("urls", "ips", "registry", "suspicious_keywords"):
+            kw += (rd.get("ioc", {}) or {}).get(k, []) or []
+
+    # imports recovered by PE reconstruction (Scylla-style IAT rebuild)
+    best = (st.get("pe_reconstruction", {}) or {}).get("best", {})
+    for imp in best.get("sample_imports", []) or []:
+        apis.add(imp.split("!")[-1])                 # DLL!Func -> Func
+        kw.append(imp.lower())                        # DLL name too (wininet -> network)
+    rpe = (st.get("triage_reconstructed", {}) or {}).get("pe", {})
+    for cat in (rpe.get("suspicious_apis", {}) or {}).values():
+        apis.update(cat)
+    rmem = st.get("memory_static_reconstructed", {}) or {}
+    for k in ("urls", "ips", "registry", "suspicious_keywords"):
+        kw += rmem.get(k, []) or []
+
+    # hint-driven dumps (memory the indirect-transfer registers pointed at)
+    for rec in (st.get("hint_dumps", {}) or {}).get("results", []):
+        ioc = rec.get("ioc", {}) or {}
+        for k in ("urls", "ips", "registry", "suspicious_keywords"):
+            kw += ioc.get(k, []) or []
 
     # recovered framework source (AutoIt/.au3, PyInstaller/.py, ...) — the real logic
     fw = st.get("framework_extract", {}) or {}

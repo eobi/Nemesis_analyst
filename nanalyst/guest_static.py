@@ -12,7 +12,7 @@ import ntpath
 import re
 from .audit import audited
 
-DIEC = r"C:\Users\Administrator\Desktop\die_win64_portable_3.21_x64\die\diec.exe"
+DIEC = r"C:\Tools\die\diec.exe"
 
 
 def _die(guest, sample: str) -> dict:

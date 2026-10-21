@@ -3,10 +3,58 @@ static vs memory-dump vs live-detonation comparison.
 """
 from __future__ import annotations
 
+import re
+
 from .proof import ATTACK_MAP
 
 
 def _h(s): return "\n".join(s) if isinstance(s, list) else s
+
+
+_DOMAIN = re.compile(r"https?://([^/:\s]+)")
+
+
+def _collect_iocs(st: dict) -> dict:
+    """Consolidate attacker-communication indicators (URLs/IPs/domains) from EVERY
+    source — static strings, recovered framework source, memory dumps, the
+    reconstructed PE, the API trace, and live detonation — each tagged with where
+    it came from, so nothing an analyst needs is scattered across the report."""
+    urls, ips, regs = {}, {}, {}
+
+    def feed(src, d):
+        for u in (d.get("urls") or []):
+            urls.setdefault(u, set()).add(src)
+        for i in (d.get("ips") or []):
+            ips.setdefault(i, set()).add(src)
+        for r in (d.get("registry") or []):
+            regs.setdefault(r, set()).add(src)
+
+    gh = st.get("static_ghidra", {})
+    if gh.get("available"):
+        feed("static (Ghidra strings)", gh.get("strings", {}) or {})
+    fw = st.get("framework_extract", {}) or {}
+    if fw.get("status") == "extracted":
+        feed("recovered source", fw)
+        for s in (fw.get("decoded_hex_strings") or []):
+            for m in _DOMAIN.findall(s):
+                urls.setdefault(f"http(s)://{m}", set()).add("recovered source (decoded)")
+    feed("memory dump (re-static)", st.get("memory_static_unpack", {}) or {})
+    feed("reconstructed PE", st.get("memory_static_reconstructed", {}) or {})
+    for rd in (st.get("api_trace", {}) or {}).get("region_dumps", []):
+        feed("API-trace region dump", rd.get("ioc", {}) or {})
+    det = st.get("detonation", {}) or {}
+    feed("live detonation (memory)", det.get("memory_static", {}) or {})
+    for n in (det.get("network") or []):
+        if "http" in str(n).lower():
+            urls.setdefault(str(n), set()).add("live detonation (network)")
+        else:
+            ips.setdefault(str(n), set()).add("live detonation (network)")
+
+    domains = {}
+    for u in urls:
+        for dm in _DOMAIN.findall(u):
+            domains.setdefault(dm, set()).update(urls[u])
+    return {"urls": urls, "ips": ips, "domains": domains, "registry": regs}
 
 
 def generate(case: dict) -> str:
@@ -61,6 +109,30 @@ def generate(case: dict) -> str:
         for e in vev:
             L.append(f"- {e}")
         L.append("")
+
+    # ---------- consolidated IOCs — attacker communication (front and center) ----------
+    ioc = _collect_iocs(st)
+    L.append("## 1·IOC — Indicators of Compromise (attacker communication / C2)")
+    if ioc["urls"] or ioc["ips"] or ioc["domains"]:
+        if ioc["urls"]:
+            L.append("**URLs (callback / download):**")
+            for u, srcs in sorted(ioc["urls"].items()):
+                L.append(f"- `{u}`  _(from: {', '.join(sorted(srcs))})_")
+        if ioc["domains"]:
+            L.append(f"**Domains:** {', '.join('`%s`' % d for d in sorted(ioc['domains']))}")
+        if ioc["ips"]:
+            L.append("**IPs:**")
+            for i, srcs in sorted(ioc["ips"].items()):
+                L.append(f"- `{i}`  _(from: {', '.join(sorted(srcs))})_")
+        if ioc["registry"]:
+            L.append("**Registry:**")
+            for r, srcs in sorted(ioc["registry"].items()):
+                L.append(f"- `{r}`  _(from: {', '.join(sorted(srcs))})_")
+    else:
+        L.append("- No network IOCs recovered yet. For this sample the C2 config is likely "
+                 "still encrypted (decrypted at beacon time) — see the Encryption section for how "
+                 "to recover it, or run the detonation phase to capture live callbacks.")
+    L.append("")
 
     # ---------- author / build reconnaissance ----------
     attr = st.get("attribution", {}) or {}

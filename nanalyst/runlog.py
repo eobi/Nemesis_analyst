@@ -45,12 +45,16 @@ PHASES = [
 
 
 class RunLog:
-    def __init__(self, case_dir: str | Path, redact: list[str] | None = None):
+    def __init__(self, case_dir: str | Path, redact: list[str] | None = None,
+                 fresh: bool = True):
         self.dir = Path(case_dir)
         self.dir.mkdir(parents=True, exist_ok=True)
         self.log_file = self.dir / "run.log"
         self.jsonl = self.dir / "run.jsonl"
         self.redact = [r for r in (redact or []) if r]
+        if fresh:   # start clean each run so logs/reports reflect only THIS run
+            self.log_file.write_text("")
+            self.jsonl.write_text("")
 
     def _scrub(self, text: str) -> str:
         for secret in self.redact:

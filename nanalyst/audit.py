@@ -90,7 +90,7 @@ def _is_failure(out) -> tuple[bool, str | None]:
 
 
 class ToolAudit:
-    def __init__(self, case_dir, redact=None, category: str = "general"):
+    def __init__(self, case_dir, redact=None, category: str = "general", fresh: bool = True):
         self.dir = Path(case_dir)
         self.dir.mkdir(parents=True, exist_ok=True)
         self.jsonl = self.dir / "tool_audit.jsonl"
@@ -99,6 +99,9 @@ class ToolAudit:
         self._seq = 0
         self._default_category = category
         self._records: list[dict] = []
+        if fresh:   # start clean each run (no accumulated prior-run calls)
+            self.jsonl.write_text("")
+            self.log.write_text("")
 
     def _scrub(self, obj):
         s = json.dumps(obj, default=str)

@@ -35,10 +35,10 @@ PACKER_SECTIONS = {"UPX0", "UPX1", "UPX2", ".ASPACK", ".ADATA", "FSG!", ".PETITE
 
 def verify_unpack(packed: dict, dumped: dict,
                   packed_ioc: dict | None = None, dumped_ioc: dict | None = None,
-                  dumped_label: str = "dumped payload") -> dict:
-    """packed/dumped = triage() dicts; *_ioc = memstatic.analyze() dicts (optional).
-    Returns a detailed verdict: per-signal score breakdown, both files' hashes, and
-    the metric deltas — so a reviewer sees exactly WHY the score is what it is."""
+                  dumped_label: str = "dumped payload", dynamic: dict | None = None) -> dict:
+    """packed/dumped = triage() dicts; *_ioc = memstatic.analyze() dicts (optional);
+    dynamic = the dynamic_unpack stage (W->X capture evidence). Returns a detailed
+    verdict: per-signal score breakdown, both files' hashes, and the metric deltas."""
     reasons, score = [], 0
     breakdown = []   # [{signal, points, max, detail}]
     metrics = {}
@@ -49,6 +49,16 @@ def verify_unpack(packed: dict, dumped: dict,
         breakdown.append({"signal": signal, "points": pts, "max": mx, "detail": detail})
         if pts:
             reasons.append(detail)
+
+    # 0. DIRECT evidence: the debugger watched the packer decrypt code into memory and
+    #    flip it writable->executable (W->X), and we dumped it at that instant. This is
+    #    the strongest proof of unpacking — independent of the heuristics below.
+    if dynamic and dynamic.get("payload_captured"):
+        n = len(dynamic.get("wx_flips", []) or [])
+        add("W->X decryption captured", 50, 50,
+            f"debugger captured the payload at {n} write->execute flip(s) (direct unpack evidence)")
+    else:
+        add("W->X decryption captured", 0, 50, "no W->X flip captured dynamically")
 
     # 1. imports (the strongest signal — packing hides the IAT)
     pi = (packed.get("pe", {}) or {}).get("import_func_count", 0) or 0

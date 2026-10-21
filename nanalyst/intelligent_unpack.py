@@ -208,8 +208,15 @@ class Engine:
         ntdll system breakpoint where kernel32/kernelbase aren't mapped yet (symbols
         won't resolve). Set a software bp at the entry and run/erun past the loader
         events until it fires — by the entry, all implicit-import DLLs are loaded."""
-        mm = self.call("module_get_main")
-        entry = ((mm.get("entry") or "") if isinstance(mm, dict) else "").lower()
+        import time
+        # debug_restart is async — wait for the module to re-register before reading its entry
+        mm, entry = {}, ""
+        for _ in range(20):
+            mm = self.call("module_get_main")
+            entry = ((mm.get("entry") or "") if isinstance(mm, dict) else "").lower()
+            if entry:
+                break
+            time.sleep(0.3)
         if not entry:
             return False, None, mm
         self.cmd(f"bp {entry}")
@@ -356,12 +363,14 @@ class Engine:
             return {"note": f"capture error: {ex}"}
         return None
 
-    def api_trace(self, out_prefix, arch="x86", max_events=150):
+    def api_trace(self, out_prefix, arch="x86", max_events=150, restart=True):
         """Break on the P1/P2 API arsenal, log each call's arguments LIVE, and capture
         the memory each exposes (allocated / protected / written / decompressed). This
         is the play-by-play an analyst watches to see exactly what the sample does."""
         from .api_spec import API_SPEC, EXIT_APIS
-        self.call("debug_restart"); self.cmd("bc"); self.cmd("bphwc")
+        if restart:
+            self.call("debug_restart")
+        self.cmd("bc"); self.cmd("bphwc")
         reached, entry, _ = self.run_to_entry()   # reach entry so all DLLs are mapped
         self.cmd("bc")                             # drop the entry bp before arming APIs
         self.build_export_map()                    # read export tables (reliable resolution)

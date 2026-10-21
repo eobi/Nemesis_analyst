@@ -40,6 +40,18 @@ def main():
         print("no target; run remote_check.py --save default"); return 1
 
     case = Case(a.sample).load()   # preserve prior static results (anomalies/hints)
+    # start clean: drop prior-run dynamic stages + volatile artifacts so the report
+    # shows ONLY this run (keep static_ghidra for the indirect-transfer hints)
+    for _stale in ("dynamic_unpack", "api_trace", "hint_dumps", "pe_reconstruction",
+                   "triage_reconstructed", "memory_static_reconstructed", "triage_dumped",
+                   "memory_static_unpack", "verify_unpack", "detonation"):
+        case.data["stages"].pop(_stale, None)
+    for _sub in (case.dumps_dir, case.decryptor_dir):
+        for _f in _sub.glob("*"):
+            try:
+                _f.unlink()
+            except Exception:
+                pass
     rl = RunLog(case.logs_dir, redact=[t.password or "\x00"])
     ta = audit.ToolAudit(case.logs_dir, redact=[t.password or "\x00"])
     audit.activate(ta)
@@ -64,7 +76,9 @@ def main():
     # --- full API-arsenal trace: live play-by-play of alloc/protect/write/decompress,
     #     capturing the decoded payload regions (defensive) ---
     print("\n[api-trace] arming the P1/P2 API breakpoint arsenal (live log in logs/run.log)")
-    at = eng.api_trace("C:\\nemesis\\api", arch=arch)
+    # run from the freshly-loaded state (do NOT debug_restart — it de-registers the
+    # module on this build; the operator reloads the sample before each run)
+    at = eng.api_trace("C:\\nemesis\\api", arch=arch, restart=False)
     case.add("api_trace", at)
     g2 = t.guest()
 
@@ -102,52 +116,16 @@ def main():
     print(f"[api-trace] {sum(at.get('counts', {}).values())} calls across "
           f"{len(at.get('counts', {}))} APIs; {len(at.get('region_dumps', []))} payload region(s) dumped")
 
-    guest_out = f"C:\\nemesis\\{Path(a.sample).stem}_unpacked.bin"
-    findings = eng.unpack(module, guest_out)
+    # The API trace already recovered the payload: the W->X flip dumped the decrypted
+    # region + a full-module image (reconstructed below). We do NOT run a separate
+    # restart-based OEP/hint phase — debug_restart de-registers the module on this build,
+    # so a clean run uses the operator's fresh load in one pass.
+    wx = [ev for ev in at.get("trace", []) if "W->X" in ((ev.get("capture") or {}).get("note") or "")]
+    findings = {"module": module, "payload_captured": bool(wx), "reached_oep": bool(wx),
+                "wx_flips": [(ev.get("capture") or {}).get("note") for ev in wx],
+                "note": "payload captured at the W->X flip during the API trace"}
     case.add("dynamic_unpack", findings)
-    print("\n[unpack] findings:", json.dumps(findings, indent=2))
-
-    # --- hint-driven dumps: break at static-flagged indirect transfers (call reg /
-    #     push-ret) and dump the memory the register points to (the unpacked payload).
-    #     Rebase Ghidra addresses to runtime (ASLR): runtime_base + (addr - image_base) ---
-    anomalies = (case.data["stages"].get("static_ghidra", {}) or {}).get("anomalies", [])
-    rb = int(runtime_base, 16) if isinstance(runtime_base, str) else (runtime_base or 0)
-    sb = static_base or 0
-    sites = []
-    for a_ in anomalies:
-        rt_addr = hex(Engine.rebase(a_["addr"], sb, rb)) if (rb and sb) else \
-                  ("0x" + a_["addr"] if not str(a_["addr"]).startswith("0x") else a_["addr"])
-        if a_.get("type") == "indirect_register":
-            sites.append({"addr": rt_addr, "static_addr": a_["addr"], "type": "indirect_register",
-                          "reg": eng._reg_from_detail(a_.get("detail", "")),
-                          "detail": a_.get("detail")})
-        elif a_.get("type") == "push_ret":
-            sites.append({"addr": rt_addr, "static_addr": a_["addr"], "type": "push_ret",
-                          "reg": None, "detail": a_.get("detail")})
-    if sites:
-        print(f"[hint-dump] rebased {len(sites)} sites (ASLR: static base {hex(sb) if sb else '?'} "
-              f"-> runtime {runtime_base})")
-        print(f"\n[hint-dump] {len(sites)} static indirect-transfer site(s) -> break + dump target memory")
-        hd = eng.hint_driven_dump(sites, "C:\\nemesis\\hintdump")
-        # pull each produced dump + re-static it
-        g2 = t.guest()
-        for rec in hd:
-            if rec.get("dump_path"):
-                lp = case.dumps_dir / Path(rec["dump_path"].replace("\\", "/")).name
-                if g2.pull(rec["dump_path"].replace("\\", "/"), str(lp)):
-                    rec["local_dump"] = str(lp)
-                    try:
-                        rec["ioc"] = memstatic.analyze(str(lp))
-                    except Exception:
-                        pass
-        case.add("hint_dumps", {"sites": len(sites), "results": hd})
-        for rec in hd:
-            tag = rec.get("classification") or ("not reached" if not rec["reached"] else "?")
-            ioc = rec.get("ioc", {})
-            extra = (f" | {len(ioc.get('urls',[]))} URLs {len(ioc.get('ips',[]))} IPs"
-                     if ioc else "")
-            print(f"  {rec['detail']} @ {rec['site']} -> {rec['reg']}={rec.get('target')} "
-                  f"[{tag}]{extra}")
+    print(f"[unpack] payload captured at W->X flip: {bool(wx)} ({len(wx)} flip event(s))")
     c.close()
 
     # pull the dump into the case dumps/ folder and re-static it
@@ -217,7 +195,8 @@ def main():
                   f"re-static: {len(bm['urls'])} URLs, {len(bm['ips'])} IPs")
             # authoritative verification: packed vs the reconstructed PE (IAT resolved)
             v2 = verify.verify_unpack(packed_triage, bt, None, bm,
-                                      dumped_label=f"reconstructed: {Path(best['out']).name}")
+                                      dumped_label=f"reconstructed: {Path(best['out']).name}",
+                                      dynamic=case.data["stages"].get("dynamic_unpack"))
             case.add("verify_unpack", v2)
             print(f"[verify] {v2['verdict']} ({v2['confidence']}/100) vs reconstructed PE")
             for b in v2.get("breakdown", []):

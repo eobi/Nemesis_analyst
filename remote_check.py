@@ -2,7 +2,7 @@
 """Connect to a user-powered analysis instance over SSH and report readiness.
 
 Usage:
-    python3 remote_check.py --host 192.168.64.3 [--port 22] [--user lab] \
+    python3 remote_check.py --host <vm-ip> [--port 22] [--user lab] \
         [--password 'YOUR_VM_PASSWORD' | --key ~/.ssh/id_ed25519] [--os windows] [--save NAME]
 
 Verifies connectivity, identifies the OS, and checks for the dynamic-analysis

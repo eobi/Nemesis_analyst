@@ -71,7 +71,7 @@ _RAW = [
     ("advapi32.CryptDeriveKey", "crypto", 1, None,
      [("hProv", 0x4), ("Algid", 0x8), ("hBaseData", 0xC), ("flags", 0x10), ("phKey", 0x14)],
      ["hProv", "Algid", "hBaseData", "flags"]),
-    ("advapi32.CryptDecrypt", "crypto", 1, None,
+    ("advapi32.CryptDecrypt", "crypto", 1, "crypt_out",
      [("hKey", 0x4), ("hHash", 0x8), ("Final", 0xC), ("flags", 0x10), ("pbData", 0x14), ("pdwDataLen", 0x18)],
      ["hKey", "hHash", "Final", "flags"]),
     ("advapi32.CryptHashData", "crypto", 2, "write_src",
@@ -79,10 +79,58 @@ _RAW = [
      ["hHash", "lpBuffer", "nSize", "flags"]),
 ]
 
+# ---- behaviour sentinels: the APIs the malware-category guide says to track (network, input capture,
+# file traversal/encryption, process/thread, persistence, share spreading). A breakpoint here proves
+# the behaviour LIVE (first few calls with arguments); it is removed after BEHAVIOR_CAP hits, so counts are
+# reported as ">= N". The plugin cannot count hits without stopping (measured: silent + fast-resume are
+# accepted but the sample still stops), so exact counts are not claimed. (group, symbol, x86 args, x64 names, capture)
+BEHAVIOR_CAP = 3
+_BEH = [
+    ("network", "ws2_32.connect", [("s", 0x4), ("name", 0x8), ("namelen", 0xC)], ["s", "name", "namelen"], None),
+    ("network", "ws2_32.send", [("s", 0x4), ("buf", 0x8), ("len", 0xC)], ["s", "buf", "len"], None),
+    ("network", "wininet.InternetConnectA", [("hInet", 0x4), ("lpServer", 0x8), ("port", 0xC)], ["hInet", "lpServer", "port"], "str:lpServer"),
+    ("network", "wininet.InternetConnectW", [("hInet", 0x4), ("lpServer", 0x8), ("port", 0xC)], ["hInet", "lpServer", "port"], "str:lpServer"),
+    ("network", "wininet.InternetOpenUrlA", [("hInet", 0x4), ("lpUrl", 0x8)], ["hInet", "lpUrl"], "str:lpUrl"),
+    ("network", "wininet.HttpSendRequestA", [("hReq", 0x4), ("lpHdr", 0x8)], ["hReq", "lpHdr"], "str:lpHdr"),
+    ("network", "winhttp.WinHttpConnect", [("hSession", 0x4), ("lpServer", 0x8), ("port", 0xC)], ["hSession", "lpServer", "port"], "str:lpServer"),
+    ("network", "urlmon.URLDownloadToFileW", [("pCaller", 0x4), ("szURL", 0x8), ("szFile", 0xC)], ["pCaller", "szURL", "szFile"], "str:szURL"),
+    ("network", "urlmon.URLDownloadToFileA", [("pCaller", 0x4), ("szURL", 0x8), ("szFile", 0xC)], ["pCaller", "szURL", "szFile"], "str:szURL"),
+    ("network", "ws2_32.gethostbyname", [("name", 0x4)], ["name"], "str:name"),
+    ("network", "ws2_32.getaddrinfo", [("node", 0x4)], ["node"], "str:node"),
+    ("input", "user32.SetWindowsHookExA", [("idHook", 0x4), ("lpfn", 0x8), ("hMod", 0xC), ("tid", 0x10)], ["idHook", "lpfn", "hMod", "tid"], None),
+    ("input", "user32.SetWindowsHookExW", [("idHook", 0x4), ("lpfn", 0x8), ("hMod", 0xC), ("tid", 0x10)], ["idHook", "lpfn", "hMod", "tid"], None),
+    ("input", "user32.GetAsyncKeyState", [("vKey", 0x4)], ["vKey"], None),
+    ("input", "user32.GetClipboardData", [("fmt", 0x4)], ["fmt"], None),
+    ("input", "user32.RegisterRawInputDevices", [("p", 0x4), ("n", 0x8)], ["p", "n"], None),
+    ("file", "kernel32.FindFirstFileW", [("lpFileName", 0x4)], ["lpFileName"], "str:lpFileName"),
+    ("file", "kernel32.FindFirstFileExW", [("lpFileName", 0x4)], ["lpFileName"], "str:lpFileName"),
+    ("file", "kernel32.CopyFileW", [("src", 0x4), ("dst", 0x8)], ["src", "dst"], "str:dst"),
+    ("file", "kernel32.MoveFileExW", [("src", 0x4), ("dst", 0x8)], ["src", "dst"], "str:dst"),
+    ("file", "kernel32.DeleteFileW", [("lpFileName", 0x4)], ["lpFileName"], "str:lpFileName"),
+    ("file", "kernel32.GetLogicalDrives", [], [], None),
+    ("crypto-file", "advapi32.CryptEncrypt", [("hKey", 0x4), ("hHash", 0x8), ("Final", 0xC), ("flags", 0x10), ("pbData", 0x14), ("pdwLen", 0x18), ("dwBuf", 0x1C)],
+     ["hKey", "hHash", "Final", "flags"], "encrypt_in"),
+    ("crypto-file", "bcrypt.BCryptEncrypt", [("hKey", 0x4), ("pbInput", 0x8), ("cbInput", 0xC)], ["hKey", "pbInput", "cbInput"], "encrypt_in_cng"),
+    ("process", "kernel32.OpenProcess", [("access", 0x4), ("inherit", 0x8), ("pid", 0xC)], ["access", "inherit", "pid"], None),
+    ("process", "ntdll.NtQueueApcThread", [("hThread", 0x4), ("apc", 0x8), ("arg1", 0xC)], ["hThread", "apc", "arg1"], None),
+    ("process", "kernel32.CreateToolhelp32Snapshot", [("flags", 0x4), ("pid", 0x8)], ["flags", "pid"], None),
+    ("process", "kernel32.CreateMutexW", [("sec", 0x4), ("owner", 0x8), ("lpName", 0xC)], ["sec", "owner", "lpName"], "str:lpName"),
+    ("persist", "advapi32.RegSetValueExW", [("hKey", 0x4), ("lpValue", 0x8)], ["hKey", "lpValue"], "str:lpValue"),
+    ("persist", "advapi32.RegCreateKeyExW", [("hKey", 0x4), ("lpSubKey", 0x8)], ["hKey", "lpSubKey"], "str:lpSubKey"),
+    ("persist", "advapi32.CreateServiceW", [("hSCM", 0x4), ("lpName", 0x8), ("lpDisplay", 0xC)], ["hSCM", "lpName", "lpDisplay"], "str:lpName"),
+    ("spread", "mpr.WNetAddConnection2W", [("lpNet", 0x4), ("pw", 0x8), ("user", 0xC)], ["lpNet", "pw", "user"], None),
+    ("spread", "netapi32.NetShareEnum", [("server", 0x4)], ["server"], "str:server"),
+]
+
 API_SPEC = [
     {"sym": s, "cat": c, "prio": p, "capture": cap, "x86": x86, "x64": x64}
     for (s, c, p, cap, x86, x64) in _RAW
+] + [
+    {"sym": s, "cat": "beh-" + g, "prio": 3, "capture": cap, "x86": x86, "x64": x64, "behavior": g, "cap": BEHAVIOR_CAP}
+    for (g, s, x86, x64, cap) in _BEH
 ]
+
+BEHAVIOR_SYMS = {sp["sym"].split(".")[-1] for sp in API_SPEC if sp.get("behavior")}
 
 EXIT_APIS = ["kernel32.ExitProcess", "ntdll.NtTerminateProcess",
              "ntdll.RtlExitUserProcess", "kernel32.TerminateProcess"]

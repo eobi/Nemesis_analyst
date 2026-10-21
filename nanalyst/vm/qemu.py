@@ -15,7 +15,8 @@ from pathlib import Path
 
 from . import config as vmcfg
 
-QEMU = "/opt/homebrew/bin/qemu-system-x86_64"
+import shutil as _sh
+QEMU = _sh.which("qemu-system-x86_64") or "qemu-system-x86_64"
 
 
 def free_port() -> int:

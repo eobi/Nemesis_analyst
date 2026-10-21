@@ -22,8 +22,9 @@ from nanalyst import (triage as T, attribution, framework_extract as fx, classif
                       decryptor, verify, proof, detailed_report, audit)
 from nanalyst.tools import ghidra_worker
 
-DEFAULT_FOLDER = "/Users/ebukaobi/Documents/OS/MACOSSHAREFOLDER/Malwares"
-UPX = "/opt/homebrew/bin/upx"
+DEFAULT_FOLDER = "samples"
+import shutil as _shutil
+UPX = _shutil.which("upx") or "upx"
 
 
 def is_pe(p: Path) -> bool:

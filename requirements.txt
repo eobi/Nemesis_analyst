@@ -1,3 +1,10 @@
 pefile>=2024.8.26
 lief>=1.0.0
 autoit-ripper
+capstone>=5
+cryptography>=42
+pyyaml
+yara-python
+stix2
+openai>=1.0
+mcp>=1.2,<2        # 2.x renamed FastMCP; tested on 1.30

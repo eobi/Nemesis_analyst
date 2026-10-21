@@ -13,6 +13,9 @@ def main(argv):
     p = Path(arg)
     if not p.exists():
         p = Path("cases") / arg / "case.json"
+        if not p.exists():                       # folders are <name>_<sha12> or <uuid>_<label>: search by sha256
+            from nanalyst.case import find_case_json
+            p = find_case_json("cases", arg) or p
     if not p.exists():
         print(f"case not found: {arg}"); return 1
     case = json.loads(p.read_text())

@@ -157,7 +157,7 @@ def _haystacks(case: dict):
         cat = ev.get("cat", "")
         if cat == "alloc":
             has_alloc = True
-        if cat in ("alloc-remote", "write-remote", "thread-remote"):
+        if cat in ("alloc-remote", "write-remote", "thread-remote") and not _targets_self(ev.get("args") or {}):
             has_remote = True
         if cat in ("load", "resolve"):
             has_resolve = True
@@ -215,6 +215,22 @@ def _haystacks(case: dict):
         kw += c.get("urls", []) + c.get("suspicious_keywords", [])
     blob = "\n".join(str(x) for x in kw).lower()
     return apis, blob
+
+
+def _targets_self(args: dict) -> bool:
+    """True when the process-handle argument is the current-process pseudo-handle (-1). The .NET
+    runtime, for one, calls NtCreateThreadEx(hProc=-1) to start threads in ITSELF — that is not
+    injection. Absent/unknown handle -> not self (the category already implies remote)."""
+    for k in ("hProc", "hProcess"):
+        v = args.get(k)
+        if v is None:
+            continue
+        try:
+            n = int(str(v), 16) if isinstance(v, str) else int(v)
+        except Exception:
+            return False
+        return n in (0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF, -1)
+    return False
 
 
 def classify(case: dict) -> dict:

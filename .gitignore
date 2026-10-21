@@ -24,3 +24,10 @@ __pycache__/
 .DS_Store
 .venv/
 venv/
+kali_config.ini
+goodware/
+kali_config.ini
+config.ini
+jots.md
+.DS_Store
+jobs/

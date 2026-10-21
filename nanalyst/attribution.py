@@ -212,3 +212,80 @@ def _summarize(res: dict) -> list:
         bits.append(f"MSVC toolchain build IDs {rh['toolchain_builds']} "
                     "(Rich-header fingerprint for same-author clustering)")
     return bits
+
+
+# ---------------------------------------------------------------------------------------------------------
+# Same-author / same-family clustering. Facts only: which fingerprints are shared with other analysed cases.
+# ---------------------------------------------------------------------------------------------------------
+def fingerprints(path: str) -> dict:
+    """Stable build fingerprints of a PE. Equal imphash / Rich-header hash / timestamp across files is a LEAD
+    (shared toolchain, builder or author), not proof of common authorship."""
+    import hashlib
+    out = {}
+    if pefile is None:
+        return out
+    try:
+        pe = pefile.PE(path, fast_load=False)
+    except Exception:
+        return out
+    try:
+        ih = pe.get_imphash()
+        if ih:
+            out["imphash"] = ih
+    except Exception:
+        pass
+    try:
+        rh = pe.parse_rich_header()
+        if rh and rh.get("clear_data"):
+            out["rich_hash"] = hashlib.md5(rh["clear_data"]).hexdigest()
+    except Exception:
+        pass
+    ts = getattr(pe.FILE_HEADER, "TimeDateStamp", 0)
+    if ts:
+        out["timestamp"] = int(ts)
+    out["section_names"] = ",".join(s.Name.rstrip(b"\x00").decode("latin-1", "replace") for s in pe.sections)
+    try:
+        sec = pe.OPTIONAL_HEADER.DATA_DIRECTORY[4]               # certificate table
+        out["signed"] = bool(sec.VirtualAddress and sec.Size)
+    except Exception:
+        pass
+    pe.close()
+    return out
+
+
+def link_cases(this: dict, cases_root: str, exclude: str = "") -> list:
+    """Compare this case's fingerprints (name -> {fp}) with those stored in other cases' case.json.
+    `this` = {label: fingerprints}. Returns [{with_case, label, other_label, shared, strength}]."""
+    import json
+    from pathlib import Path
+    links = []
+    for cj in Path(cases_root).glob("*/case.json"):
+        if exclude and exclude in str(cj.parent):
+            continue
+        try:
+            other = (json.loads(cj.read_text()).get("stages", {}) or {}).get("author_fingerprints") or {}
+        except Exception:
+            continue
+        for l1, f1 in this.items():
+            for l2, f2 in other.items():
+                shared = [k for k in ("imphash", "rich_hash", "timestamp") if f1.get(k) and f1.get(k) == f2.get(k)]
+                # section-name set only counts when it is unusual (not just .text,.rdata,.data,.rsrc,.reloc)
+                common = {".text", ".data", ".rdata", ".rsrc", ".reloc", ".idata", ".pdata", ".bss"}
+                if f1.get("section_names") and f1.get("section_names") == f2.get("section_names") \
+                        and not set(f1["section_names"].split(",")) <= common:
+                    shared.append("section_names")
+                if shared:
+                    strong = ("imphash" in shared and "rich_hash" in shared) or "timestamp" in shared
+                    links.append({"with_case": cj.parent.name, "label": l1, "other_label": l2, "shared": shared,
+                                  "strength": "strong lead" if strong else "weak lead"})
+    return links
+
+
+def masquerade_note(res: dict, fp: dict, packed: bool) -> str | None:
+    """Version info naming a publisher while the file is unsigned and packed is a copied/forged resource, not an author."""
+    vi = res.get("version_info", {}) or {}
+    pub = vi.get("CompanyName") or vi.get("LegalCopyright")
+    if pub and fp.get("signed") is False and packed:
+        return (f"Version info names '{pub}' but the file carries no digital signature and is packed: this looks like "
+                "a copied/forged resource used to blend in, not evidence of who wrote it.")
+    return None

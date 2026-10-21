@@ -78,6 +78,8 @@ def _is_failure(out) -> tuple[bool, str | None]:
     if isinstance(out, tuple) and len(out) == 3 and isinstance(out[0], int) and out[0] != 0:
         return True, f"ssh returncode={out[0]}"
     if isinstance(out, dict):
+        if "Module not found" in str(out.get("message", "")):
+            return False, None          # probing for a DLL that is not loaded yet is expected, not a tool failure
         if out.get("error"):
             return True, str(out.get("error"))[:200]
         if out.get("success") is False:

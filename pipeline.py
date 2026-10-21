@@ -71,7 +71,7 @@ def run(guest_sample, target_name="default", detonate=False):
         unpacked = local.with_name(local.stem + "_unpacked" + local.suffix)
         rl.log("upx_unpack", "UPX detected -> upx -d", pk)
         ta.run("upx -d", {"in": str(local), "out": str(unpacked)},
-               lambda: subprocess.run(["/opt/homebrew/bin/upx", "-d", str(local),
+               lambda: subprocess.run([__import__("shutil").which("upx") or "upx", "-d", str(local),
                                        "-o", str(unpacked)], capture_output=True),
                category="static")
         if unpacked.exists():

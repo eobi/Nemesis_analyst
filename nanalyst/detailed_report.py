@@ -3,7 +3,10 @@ static vs memory-dump vs live-detonation comparison.
 """
 from __future__ import annotations
 
+import time
+
 import re
+from pathlib import Path
 
 from .proof import ATTACK_MAP
 
@@ -19,7 +22,7 @@ def _collect_iocs(st: dict) -> dict:
     source — static strings, recovered framework source, memory dumps, the
     reconstructed PE, the API trace, and live detonation — each tagged with where
     it came from, so nothing an analyst needs is scattered across the report."""
-    urls, ips, regs = {}, {}, {}
+    urls, ips, regs, doms = {}, {}, {}, {}
 
     def feed(src, d):
         for u in (d.get("urls") or []):
@@ -28,6 +31,14 @@ def _collect_iocs(st: dict) -> dict:
             ips.setdefault(i, set()).add(src)
         for r in (d.get("registry") or []):
             regs.setdefault(r, set()).add(src)
+        for dm in (d.get("domains") or []):
+            doms.setdefault(dm, set()).add(src)
+
+    # 3-stage deep static (packed / unpacked / decrypted) — tagged by stage
+    feed("deep static (packed)", st.get("deep_static_packed", {}) or {})
+    feed("deep static (unpacked)", st.get("deep_static_unpacked", {}) or {})
+    for s in (st.get("deep_static_decrypted", {}) or {}).get("sources", []):
+        feed("deep static (decrypted)", s)
 
     gh = st.get("static_ghidra", {})
     if gh.get("available"):
@@ -42,6 +53,8 @@ def _collect_iocs(st: dict) -> dict:
     feed("reconstructed PE", st.get("memory_static_reconstructed", {}) or {})
     for rd in (st.get("api_trace", {}) or {}).get("region_dumps", []):
         feed("API-trace region dump", rd.get("ioc", {}) or {})
+    for pd in (st.get("api_trace", {}) or {}).get("plan_dumps", []):
+        feed("AI-plan watch region", pd.get("ioc", {}) or {})
     det = st.get("detonation", {}) or {}
     feed("live detonation (memory)", det.get("memory_static", {}) or {})
     for n in (det.get("network") or []):
@@ -50,11 +63,309 @@ def _collect_iocs(st: dict) -> dict:
         else:
             ips.setdefault(str(n), set()).add("live detonation (network)")
 
-    domains = {}
+    domains = dict(doms)
     for u in urls:
         for dm in _DOMAIN.findall(u):
             domains.setdefault(dm, set()).update(urls[u])
     return {"urls": urls, "ips": ips, "domains": domains, "registry": regs}
+
+
+_DS_CATS = [
+    ("urls", "URLs"), ("domains", "Domains"), ("ips", "IPs"),
+    ("file_paths", "File paths"), ("pdb_paths", "PDB build paths"),
+    ("registry", "Registry keys"), ("mutex_hints", "Named objects / mutexes"),
+    ("commands", "Shell commands"), ("service_ops", "Service ops"),
+    ("user_agents", "User-Agents"), ("wallets", "Crypto wallets"),
+    ("guids", "GUIDs"), ("emails", "Emails"),
+    ("anti_analysis_indicators", "Anti-analysis indicators"),
+    ("suspicious_keywords", "Suspicious keywords"), ("base64_blobs", "Base64 blobs"),
+]
+
+
+def _ds_render(ds: dict, title: str, out: list):
+    """Render one deep-static stage (packed/unpacked/decrypted)."""
+    out.append(f"### {title}")
+    out.append(f"- Size {ds.get('size',0):,} bytes · entropy **{ds.get('entropy','?')}** "
+               f"· {ds.get('string_count',0):,} strings extracted")
+    any_hit = False
+    for key, label in _DS_CATS:
+        vals = ds.get(key) or []
+        if not vals:
+            continue
+        any_hit = True
+        shown = ", ".join(f"`{x}`" for x in vals[:25])
+        more = f" _(+{len(vals)-25} more)_" if len(vals) > 25 else ""
+        out.append(f"- **{label}** ({len(vals)}): {shown}{more}")
+    if not any_hit:
+        out.append("- No notable indicators at this stage "
+                   "(expected for a crypted/packed file — real config surfaces after unpack/decrypt).")
+    out.append("")
+
+
+def _code_patterns_section(st: dict) -> list:
+    """Render analyst-grade suspicious code/byte patterns (packed + unpacked)."""
+    stages = [(s, st.get(f"code_patterns_{s}")) for s in ("packed", "unpacked")]
+    stages = [(s, c) for s, c in stages if c and c.get("findings")]
+    if not stages:
+        return []
+    out = ["## 2·CODE — Suspicious code & byte patterns (what an analyst would flag)",
+           "Machine-code idioms spotted in the bytes: shellcode stubs, PEB walks, "
+           "anti-debug/anti-VM instructions, packer stubs, indirect control flow, embedded "
+           "PEs and W+X sections — with file offsets.", ""]
+    for stage, c in stages:
+        cnt = c.get("counts", {})
+        out.append(f"### {stage.capitalize()} — {cnt.get('high',0)} high / "
+                   f"{cnt.get('medium',0)} medium / {cnt.get('info',0)} info")
+        out.append("| Severity | Indicator | Count | Offsets / names | Why it matters |")
+        out.append("|---|---|---|---|---|")
+        for f in c["findings"]:
+            offs = ", ".join(f"`{o}`" for o in f.get("offsets", [])[:6])
+            out.append(f"| {f['severity'].upper()} | {f['title']} | {f['count']} | {offs} | {f['why']} |")
+        da = c.get("entry_disasm") or {}
+        if da.get("flagged"):
+            out.append("")
+            out.append(f"**Flagged instructions at/near entry ({da.get('entry_va','?')}, {da.get('arch','?')}):**")
+            out.append("```")
+            out += da["flagged"][:20]
+            out.append("```")
+        if da.get("listing"):
+            out.append("")
+            out.append("<details><summary>Entry-point disassembly (first instructions)</summary>")
+            out.append("")
+            out.append("```asm")
+            out += da["listing"][:40]
+            out.append("```")
+            out.append("</details>")
+        secs = c.get("sections") or []
+        if secs:
+            out.append("")
+            out.append("**PE sections (anatomy):**")
+            out.append("| Name | VSize | RawSize | Entropy | Flags |")
+            out.append("|---|---|---|---|---|")
+            for s in secs:
+                flags = ("X" if s.get("exec") else "") + ("W" if s.get("write") else "")
+                out.append(f"| `{s['name']}` | {s['vsize']:,} | {s['rawsize']:,} | "
+                           f"{s['entropy']} | {flags or '-'} |")
+        out.append("")
+    return out
+
+
+def _deep_static_section(st: dict) -> list:
+    """3-stage deep static: packed -> unpacked -> decrypted, so the reader sees exactly
+    what each stage revealed (and that strings were re-examined after unpacking + decryption)."""
+    packed = st.get("deep_static_packed")
+    unpacked = st.get("deep_static_unpacked")
+    decrypted = st.get("deep_static_decrypted")
+    if not (packed or unpacked or decrypted):
+        return []
+    out = ["## 2·DEEP — Deep static analysis (strings re-examined at every stage)",
+           "Strings and indicators are extracted from the on-disk file, then **again after "
+           "unpacking**, then **again after decryption** — unencrypted leads (C2, mutexes, paths, "
+           "config) typically appear only in the later stages.", ""]
+    if packed:
+        _ds_render(packed, "Stage 1 — Packed (on-disk file)", out)
+    if unpacked:
+        _ds_render(unpacked, "Stage 2 — Unpacked (reconstructed payload)", out)
+    else:
+        out.append("### Stage 2 — Unpacked")
+        out.append("- Not available — no payload was captured/reconstructed this run.")
+        out.append("")
+    if decrypted:
+        for src in decrypted.get("sources", []):
+            _ds_render(src, f"Stage 3 — Decrypted ({src.get('source','output')})", out)
+    else:
+        out.append("### Stage 3 — Decrypted")
+        out.append("- Not available — no decrypted artifact was produced this run.")
+        out.append("")
+    return out
+
+
+def _ai_section(st: dict) -> list:
+    """Render the AI analyst assessment(s). Advisory interpretation + strategy — the
+    maliciousness verdict/score remains the deterministic engine's (proof.py)."""
+    stages = [(s, st.get(f"ai_assessment_{s}")) for s in ("packed", "unpacked", "decrypted")]
+    stages = [(s, a) for s, a in stages if a]
+    plan = st.get("ai_dynamic_plan")
+    if not stages and not plan:
+        return []
+    out = ["## 1·AI — Analyst assessment (AI-assisted interpretation)",
+           "_AI reasoning over the extracted evidence. Advisory: it guides analysis and "
+           "strategy; it does **not** set the maliciousness score (that is the deterministic, "
+           "evidence-gated verdict above)._", ""]
+    for stage, a in stages:
+        out.append(f"### Stage: {stage} — model `{a.get('_ai_model','?')}`")
+        out.append(f"- **Likely family:** {a.get('likely_family','unknown')} "
+                   f"(confidence: {a.get('family_confidence','?')})")
+        audit = a.get("claims_audit") or {}
+        if audit.get("encrypted_regions"):
+            for x in audit["encrypted_regions"][:8]:
+                mark = "✓ supported" if x["supported"] else "✗ NOT supported by the entropy map"
+                out.append(f"- **AI claim — encrypted region:** {x['claim']} ({x.get('likely')}) — {mark}: {x['basis']}")
+        else:
+            for r in (a.get("encrypted_regions") or [])[:8]:
+                out.append(f"- **Encrypted region (unaudited):** {r.get('where')} — {r.get('likely')} ({r.get('evidence')})")
+        for x in (audit.get("url_leads") or [])[:6]:
+            if not x["supported"]:
+                out.append(f"- **AI lead discarded:** `{x['lead']}` — {x['basis']}")
+        for x in (audit.get("url_leads") or [])[:6]:
+            if x["supported"]:
+                out.append(f"- **URL/C2 lead (supported):** `{x['lead']}` — {x['basis']}")
+        for key, label in [("capabilities", "Capabilities"), ("config_leads", "Config/C2 leads"),
+                           ("notable_strings", "Notable strings"),
+                           ("anti_analysis_expected", "Anti-analysis expected"),
+                           ("dynamic_strategy", "Suggested dynamic strategy")]:
+            vals = a.get(key) or []
+            if vals:
+                out.append(f"- **{label}:**")
+                for v in vals[:12]:
+                    out.append(f"    - {v}")
+        if a.get("packer_assessment"):
+            out.append(f"- **Packer:** {a['packer_assessment']}")
+        if a.get("reasoning"):
+            out.append(f"- **Reasoning:** {a['reasoning']}")
+        out.append("")
+    if plan:
+        acc, rej = plan.get("accepted") or {}, plan.get("rejected") or []
+        out.append("### AI dynamic plan (static → dynamic hand-off)")
+        out.append("_The AI proposed this from the static findings; a validator decides what the debugger may act on "
+                   "(APIs must be in our arsenal, regions inside the image). Anti-evasion items are advisory only._")
+        if acc.get("hypothesis"):
+            out.append(f"- **Hypothesis:** {acc['hypothesis']}")
+        for p in acc.get("priority_apis", []):
+            out.append(f"- **Priority API (armed, raised noise cap):** `{p['api']}` — {p['why']}")
+        ra = {x["rva"]: x for x in (plan.get("region_audit") or [])}
+        for w in acc.get("watch_regions", []):
+            a_ = ra.get(hex(int(w["rva"])), {})
+            tag = "justified" if a_.get("supported") else "NOT justified by the entropy map"
+            out.append(f"- **Watch region (dumped at end of trace, {tag}):** rva `0x{int(w['rva']):x}` size "
+                       f"`0x{int(w['size']):x}` — {w['why']}" + (f" _(evidence: {a_['basis']})_" if a_ else ""))
+        for e in acc.get("anti_evasion", []):
+            out.append(f"- **Anti-evasion (advisory):** {e['technique']} → {e['action']}")
+        for e in acc.get("expected_events", []):
+            out.append(f"- **Expected at runtime:** {e}")
+        for r in rej:
+            out.append(f"- **Rejected:** {r['item']} — {r['reason']}")
+        pd = (st.get("api_trace", {}) or {}).get("plan_dumps", [])
+        if pd:
+            out.append(f"- **Plan regions actually dumped:** {', '.join('`'+d['rva']+'`' for d in pd)}")
+        out.append("")
+    return out
+
+
+def _entropy_section(st: dict) -> list:
+    """Where the encrypted/compressed bytes are (entropy map)."""
+    em = st.get("entropy_map")
+    if not em or not em.get("sections"):
+        return []
+    out = ["## 2·ENT — Entropy map (where the encrypted / compressed bytes are)",
+           f"File entropy **{em.get('file_entropy')}** · image base `{em.get('image_base')}` · "
+           f"size of image `{em.get('size_of_image')}` · entry RVA `{em.get('entry_rva')}`", "",
+           "| Section | RVA | Raw size | Virtual size | Entropy | Notes |", "|---|---|---|---|---|---|"]
+    for s_ in em["sections"]:
+        notes = ", ".join(x for x in ("RUNTIME-EXPANDED (fills in at runtime)" if s_.get("runtime_expanded") else "",
+                                      "X" if s_.get("exec") else "", "W" if s_.get("write") else "") if x)
+        out.append(f"| `{s_['name']}` | {s_['rva']} | {s_['raw_size']:,} | {s_['vsize']:,} | {s_['entropy']} | {notes} |")
+    out.append("")
+    if em.get("regions"):
+        out.append("**High-entropy regions** (likely encrypted or compressed):")
+        out.append("| Kind | Section | RVA | File offset | Size | Entropy |"); out.append("|---|---|---|---|---|---|")
+        for r in em["regions"]:
+            out.append(f"| {r.get('kind')} | {r.get('section')} | {r.get('rva')} | 0x{r['file_off']:x} | {r['size']:,} | {r['entropy']} |")
+        out.append("")
+    if em.get("tls_callbacks"):
+        out.append(f"> ⚠ **TLS callbacks** at RVA {', '.join('`'+x+'`' for x in em['tls_callbacks'])}: they run before the "
+                   "debugger's entry stop, so sample code executes uncontrolled while loading.")
+        out.append("")
+    if em.get("overlay"):
+        o = em["overlay"]
+        out.append(f"**Overlay** (data after the last section): {o['size']:,} bytes at 0x{o['file_off']:x}, entropy {o['entropy']}")
+        out.append("")
+    if em.get("resources"):
+        out.append("**Largest resources:** " + "; ".join(
+            f"{r['type']}/{r['name']} {r['size']:,}B H={r['entropy']}" for r in em["resources"][:6]))
+        out.append("")
+    return out
+
+
+def _load_section(st: dict) -> list:
+    """How the sample was started under the debugger, and whether its start was fully observed."""
+    li = st.get("load_info")
+    if not li:
+        return []
+    out = ["## 7·LOAD — How the sample was started under the debugger",
+           f"- Module `{li.get('module')}`, entry `{li.get('entry')}`, first stop at `{li.get('eip')}`.",
+           f"- **{li.get('note')}**"]
+    if li.get("at_entry") is False:
+        out.append("> ⚠ The debugger did not stop at the entry point (it can stop first inside the runtime or the "
+                   "loader). Code that ran before that first stop was not observed; the API arsenal was armed from "
+                   "the first stop onward.")
+    out.append("")
+    return out
+
+
+def _intel_section(st: dict) -> list:
+    """The detection package: what was filed for vendors, and what is NOT available and why."""
+    p = st.get("intel_package")
+    if not p:
+        return []
+    out = ["## 8·INTEL — Detection package (for AV, firewall, EDR and threat-intel vendors)",
+           f"Files are in `intel/`: **{p.get('indicators', 0)}** indicators "
+           f"(**{p.get('high_confidence', 0)}** high-confidence, tier >= 70), "
+           f"{p.get('excluded', 0)} filtered out as known-good/noise (listed with reasons in `iocs.json`), "
+           f"{p.get('suricata_rules', 0)} Suricata rule(s), {p.get('sigma_rules', 0)} Sigma rule(s), "
+           f"STIX 2.1 bundle: {'yes' if p.get('stix') else 'no (no blockable high-confidence indicator)'}.", "",
+           "| Indicator class | Found | Not available because |", "|---|---|---|"]
+    for k, v in (p.get("availability") or {}).items():
+        out.append(f"| {k} | {v.get('count', 0)}" + (f" ({v['high_confidence']} high-confidence)" if "high_confidence" in v else "")
+                   + f" | {v.get('note') or ''} |")
+    out.append("")
+    if p.get("yara"):
+        out.append("**YARA rules** (one per stage):")
+        out.append("| Stage | File | Result |"); out.append("|---|---|---|")
+        for y in p["yara"]:
+            res = ("written — " + y["note"]) if y.get("written") else y["note"]
+            if y.get("goodware_false_positives"):
+                res += f"; goodware false positives {y['goodware_false_positives']}"
+            out.append(f"| {y['stage']} | `{y['file']}` | {res} |")
+        out.append("")
+    out.append("_Tiers: observed 90 · decrypted 80 · unpacked 70 · static 40 · AI-suggested 20 (never emitted as a rule). "
+               "Auto-generated YARA must be validated against your goodware set before deployment._")
+    out.append("")
+    return out
+
+
+def _residue_section(st: dict) -> list:
+    """What the run left on the guest, and whether the VM can be reused."""
+    r = st.get("residue")
+    if not r:
+        return []
+    out = ["## 7·VM — VM residue check (what the run left behind)",
+           f"**{r.get('verdict', 'unknown')}**", ""]
+    k = r.get("killed") or {}
+    if isinstance(k, dict) and k.get("killed"):
+        out.append(f"Processes killed ({len(k['killed'])}):")
+        out += [f"- `{x}`" for x in k["killed"][:15]]
+        out.append("")
+    for key, label in (("new_processes", "New processes still running"), ("new_run_values", "New Run/RunOnce values"),
+                       ("new_tasks", "New scheduled tasks"), ("new_services", "New services"),
+                       ("new_files", "New files in user/temp/startup dirs")):
+        vals = r.get(key) or []
+        if vals:
+            out.append(f"**{label}** ({len(vals)}):")
+            out += [f"- `{v}`" for v in vals[:15]]
+            out.append("")
+    ben = r.get("new_processes_benign") or []
+    if ben:
+        out.append(f"_{len(ben)} new process(es) were ignored as our own SSH session or ordinary Windows "
+                   "service hosts (not residue)._")
+        out.append("")
+    if r.get("mass_file_change"):
+        out.append(f"**Mass file change:** removed {r.get('removed_count')}, modified {r.get('modified_count')}")
+        out.append("")
+    out.append("_Heuristic: only user/temp/startup dirs, Run keys, tasks, services and processes are "
+               "inspected. It cannot see injected code, WMI subscriptions or kernel-level changes._")
+    out.append("")
+    return out
 
 
 def generate(case: dict) -> str:
@@ -73,13 +384,23 @@ def generate(case: dict) -> str:
     L.append(f"# Malware Analysis Report — {case.get('name')}")
     L.append("")
     v = poc.get("verdict", {})
-    L.append(f"**Verdict:** {v.get('label','?')}  (confidence {v.get('confidence','?')}/100)  ")
+    _basis = v.get("basis")
+    _basis_tag = f" · basis: {_basis}" if _basis else ""
+    L.append(f"**Triage hint:** {v.get('label','?')} ({v.get('confidence','?')}/100{_basis_tag}). "
+             f"This is a quick screening flag, not the purpose of this report: the analysis below (category, stages, dumps, "
+             f"indicators, encryption, author leads) is the result.  ")
+    _mc = st.get("malware_category") or {}
+    if _mc.get("primary"):
+        L.append(f"**Category:** {_mc['primary']}  ")
     if cls.get("primary"):
         L.append(f"**Family (behavioral):** {cls['primary']}"
                  + (f" (+{', '.join(cls['secondary'])})" if cls.get("secondary") else "") + "  ")
     L.append(f"**Completeness:** {poc.get('completeness','?')}  ")
     L.append(f"**SHA-256:** `{case.get('sha256')}`  ")
     L.append(f"**Size:** {case.get('size',0):,} bytes  ")
+    # honesty banner: surface what was NOT established right at the top
+    for cav in v.get("caveats", []):
+        L.append(f"> ⚠ {cav}  ")
     L.append("")
 
     # ---------- executive summary ----------
@@ -102,12 +423,28 @@ def generate(case: dict) -> str:
                        f"**{len(mem.get('ips',[]))} IP(s)** not visible in static analysis.")
     L += summary
     L.append("")
-    # why the verdict got its score — every point is justified
-    vev = (poc.get("verdict", {}) or {}).get("evidence", [])
-    if vev:
-        L.append(f"**Why the verdict is {v.get('label','?')} ({v.get('confidence','?')}/100):**")
-        for e in vev:
-            L.append(f"- {e}")
+    # why the verdict got its score — every point is justified, split static vs dynamic
+    s_ev = v.get("static_evidence") or []
+    d_ev = v.get("dynamic_evidence") or []
+    if s_ev or d_ev or v.get("evidence"):
+        L.append(f"**Why the verdict is {v.get('label','?')} "
+                 f"({v.get('confidence','?')}/100, basis: {v.get('basis','?')}):**")
+        if s_ev:
+            L.append(f"_Static indicators (capability, not proof of behaviour — "
+                     f"subtotal {v.get('static_score','?')}):_")
+            for e in s_ev:
+                L.append(f"- {e}")
+        if d_ev:
+            L.append(f"_Dynamic evidence (what it actually did — subtotal {v.get('dynamic_score','?')}):_")
+            for e in d_ev:
+                L.append(f"- {e}")
+        if not (s_ev or d_ev):            # back-compat: old flat evidence list
+            for e in v.get("evidence", []):
+                L.append(f"- {e}")
+        if v.get("caveats"):
+            L.append("_Caveats (not established):_")
+            for c in v["caveats"]:
+                L.append(f"- {c}")
         L.append("")
 
     # ---------- consolidated IOCs — attacker communication (front and center) ----------
@@ -145,6 +482,24 @@ def generate(case: dict) -> str:
             L.append("- Full version-info resource:")
             for k, vv in vi.items():
                 L.append(f"  - {k}: `{vv}`")
+        L.append("")
+
+    _al = (st.get("author_links") or {}).get("links") or []
+    _fps = st.get("author_fingerprints") or {}
+    if _fps:
+        L.append("### Author / build fingerprints and clustering")
+        L.append("| File | imphash | Rich-header hash | Compile time (UTC) | Signed |")
+        L.append("|---|---|---|---|---|")
+        for _n, _f in _fps.items():
+            _t = time.strftime("%Y-%m-%d %H:%M", time.gmtime(_f["timestamp"])) if _f.get("timestamp") else "-"
+            L.append(f"| `{_n}` | `{_f.get('imphash', '-')}` | `{_f.get('rich_hash', '-')}` | {_t} | {_f.get('signed', '-')} |")
+        L.append("")
+        if _al:
+            L.append("Shared fingerprints with earlier analysed cases (a lead for same builder/author/toolchain, not proof):")
+            for _l in _al[:12]:
+                L.append(f"- **{_l['strength']}**: `{_l['label']}` shares {', '.join(_l['shared'])} with `{_l['other_label']}` in case `{_l['with_case']}`")
+        else:
+            L.append("No earlier analysed case shares these fingerprints.")
         L.append("")
 
     # ---------- behavioral classification ----------
@@ -267,6 +622,21 @@ def generate(case: dict) -> str:
                     L.append(f"  - **{cat}**: {', '.join(apis_[:10])}")
         L.append("")
 
+    # ---------- AI analyst assessment (advisory interpretation + strategy) ----------
+    L += _ai_section(st)
+
+    # ---------- deep static (3-stage strings/IOC extraction) ----------
+    L += _deep_static_section(st)
+    L += _entropy_section(st)
+
+    # ---------- suspicious code & byte patterns (analyst-grade) ----------
+    L += _code_patterns_section(st)
+
+    # ---------- VM residue check (kill tree + diff) ----------
+    L += _load_section(st)
+    L += _intel_section(st)
+    L += _residue_section(st)
+
     # ---------- per-tool static ----------
     L.append("## 2. Static analysis — what each tool discovered")
 
@@ -372,12 +742,23 @@ def generate(case: dict) -> str:
         L.append("")
         L.append("| Dump (link) | Size | PE | Imports | re-static URLs/IPs | Same as packed? | MD5 | SHA-256 |")
         L.append("|---|---|---|---|---|---|---|---|")
+        _base = Path(case.get("dir", ""))
+        missing = 0
         for r in dm["dumps"]:
             imp = r.get("imports", "-") if r.get("pe") else "-"
             same = "YES ⚠" if r.get("same_as_packed") else "no"
             ui = f"{r.get('urls', 0)}/{r.get('ips', 0)}"
-            L.append(f"| [`{r['name']}`]({r['path']}) | {r['size']:,} | {'yes' if r['pe'] else '-'} | "
+            # reconcile with disk: never link a file that isn't there
+            exists = (_base / r["path"]).exists() if case.get("dir") else True
+            name_cell = f"[`{r['name']}`]({r['path']})" if exists else f"`{r['name']}` _(FILE MISSING)_"
+            if not exists:
+                missing += 1
+            L.append(f"| {name_cell} | {r['size']:,} | {'yes' if r['pe'] else '-'} | "
                      f"{imp} | {ui} | {same} | `{r['md5']}` | `{r['sha256']}` |")
+        if missing:
+            L.append("")
+            L.append(f"> ⚠ {missing} dump file(s) listed in the manifest are not present on disk "
+                     "(cleaned up or never pulled). They are shown for the record but not linked.")
         L.append("")
         L.append("**Packed vs reconstructed — did unpacking change the file?**")
         L.append("| | Packed input | Reconstructed payload |")
@@ -400,6 +781,16 @@ def generate(case: dict) -> str:
             for ip in rm.get("ips", [])[:15]:
                 L.append(f"- IP `{ip}`")
         L.append("")
+
+    try:
+        from . import dump_analysis as _da, category_guide as _cg, crypto_analysis as _ca
+        L += _da.to_markdown(st.get("dump_analysis") or {})
+        if st.get("malware_category") is not None:
+            L += _cg.to_markdown(st["malware_category"])
+        if st.get("file_crypto"):
+            L += _ca.to_markdown(st["file_crypto"])
+    except Exception:
+        pass
 
     # ---------- legacy detonation memory dump (if --detonate ran) ----------
     L.append("## 3b. Detonation memory dump + re-static")
@@ -479,6 +870,11 @@ def generate(case: dict) -> str:
     L.append("")
 
     # ---------- comparison ----------
+    try:
+        from . import procmon_summary as _pms
+        L += _pms.to_markdown(st.get("procmon_summary") or {})
+    except Exception:
+        pass
     L.append("## 5. Comparison — static vs memory vs live detonation")
     L.append("| Indicator source | URLs | IPs | Registry | Notes |")
     L.append("|---|---|---|---|---|")
@@ -504,7 +900,7 @@ def generate(case: dict) -> str:
 
     # ---------- artifacts ----------
     L.append("## 7. Artifacts")
-    L.append(f"- Analysis folder: `{case.get('name')}_{(case.get('sha256') or '')[:12]}/` "
+    L.append(f"- Analysis folder: `{Path(case.get('dir') or '').name or (str(case.get('name')) + '_' + (case.get('sha256') or '')[:12])}/` "
              "(subfolders: dumps/, source/, decryptor/, logs/, artifacts/)")
     if deob and deob.get("deobfuscated"):
         L.append(f"- Deobfuscated assembly: `{deob['deobfuscated']}`")

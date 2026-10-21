@@ -9,7 +9,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-QEMU_IMG = "/opt/homebrew/bin/qemu-img"
+import shutil as _sh
+QEMU_IMG = _sh.which("qemu-img") or "qemu-img"
 
 
 def _run(args: list[str], timeout: int = 1800) -> tuple[bool, str]:

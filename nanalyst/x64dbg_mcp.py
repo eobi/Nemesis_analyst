@@ -12,6 +12,7 @@ desktop with the sample; then this client drives it.
 from __future__ import annotations
 
 import json
+import shutil
 import socket
 import subprocess
 import time
@@ -35,11 +36,18 @@ class X64dbgMCP:
     def ensure_tunnel(self) -> bool:
         if self._port_open(self.local_port):
             return True
-        cmd = ["/opt/homebrew/bin/sshpass", "-p", self.target.password, "ssh",
-               "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
-               "-o", "PubkeyAuthentication=no", "-o", "ExitOnForwardFailure=yes",
-               "-N", "-L", f"{self.local_port}:127.0.0.1:{self.remote_port}",
-               "-p", str(self.target.port), f"{self.target.user}@{self.target.host}"]
+        ssh_opts = ["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
+                    "-o", "ExitOnForwardFailure=yes",
+                    "-N", "-L", f"{self.local_port}:127.0.0.1:{self.remote_port}",
+                    "-p", str(self.target.port), f"{self.target.user}@{self.target.host}"]
+        if getattr(self.target, "key", None):                 # key auth: no sshpass needed
+            cmd = ["ssh", "-i", self.target.key, "-o", "PubkeyAuthentication=yes", *ssh_opts]
+        else:
+            sshpass = shutil.which("sshpass")
+            if not sshpass:
+                raise RuntimeError("sshpass not found (needed for password SSH). Install it "
+                                   "(brew install sshpass / apt install sshpass) or use key auth in targets.json.")
+            cmd = [sshpass, "-p", self.target.password, "ssh", "-o", "PubkeyAuthentication=no", *ssh_opts]
         self._tunnel = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for _ in range(15):
             if self._port_open(self.local_port):

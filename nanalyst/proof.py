@@ -5,7 +5,7 @@ dynamic + re-static later) into a single evidence-backed report: identity,
 verdict, capabilities mapped to MITRE ATT&CK, IOCs, obfuscation evidence, and
 the dynamic next-steps. Emits Markdown and a structured dict.
 
-The AI brain (Claude over MCP) calls this to produce the final artifact; it also
+The AI brain (an LLM client over MCP) calls this to produce the final artifact; it also
 runs standalone so the pipeline always yields a report with no LLM required.
 """
 from __future__ import annotations
@@ -22,86 +22,124 @@ ATTACK_MAP = {
 }
 
 
+# APIs whose runtime, by-name resolution is a classic loader/injector tell (as opposed to the
+# hundreds of ordinary lookups any CRT/.NET start-up performs)
+SUSPICIOUS_RESOLVED = {"virtualalloc", "virtualallocex", "virtualprotect", "virtualprotectex",
+                       "writeprocessmemory", "createremotethread", "ntcreatethreadex", "ntunmapviewofsection",
+                       "setthreadcontext", "resumethread", "queueuserapc", "rtldecompressbuffer",
+                       "cryptdecrypt", "winexec", "urldownloadtofilea", "urldownloadtofilew",
+                       "internetopena", "internetopenw", "internetopenurla", "createprocessa", "createprocessw",
+                       "ntwritevirtualmemory", "ntallocatevirtualmemory", "ntprotectvirtualmemory"}
+
+STATIC_ONLY_CAP = 55        # static indicators alone cannot "confirm" malice — cap confidence
+
 def _verdict(triage: dict, static: dict, stg: dict | None = None) -> dict:
-    """Maliciousness assessment with an evidence list. Factors in DYNAMIC findings
-    (what the sample actually did at runtime), not just static imports — a packed
-    sample is static-blind, so the dynamic trace is where the verdict comes from."""
+    """Maliciousness assessment with a POINT-ATTRIBUTED evidence list, split into
+    static indicators and dynamic (runtime) proof.
+
+    Honesty rules (so the verdict can never over-claim):
+      * The MALICIOUS label and any high confidence require DYNAMIC evidence — what
+        the sample actually did at runtime (confirmed unpack, behavioral class,
+        memory-API activity, recovered crypto/IOCs). Static imports describe
+        *capability*, not behavior, so static-only is capped at STATIC_ONLY_CAP and
+        can rise no higher than 'SUSPICIOUS (static-only)'.
+      * Every point added states its reason inline as '(+N)'.
+      * `caveats` spells out what was NOT established (e.g. payload not captured)."""
     stg = stg or {}
-    score = 0
-    evidence = []
+    s_score, d_score = 0, 0           # static vs dynamic, kept separate
+    static_ev, dynamic_ev, caveats = [], [], []
     caps = triage.get("pe", {}).get("suspicious_apis", {})
 
-    if "injection" in caps:
-        score += 25
-        evidence.append("imports process-injection APIs")
-    if "dynamic_resolution" in caps:
-        score += 15
-        evidence.append("resolves APIs at runtime (hides intent from static analysis)")
-    if "anti_analysis" in caps:
-        score += 15
-        evidence.append("imports anti-analysis / anti-debug APIs")
-    if "network" in caps:
-        score += 10
-        evidence.append("networking capability present")
-    if "persistence" in caps:
-        score += 10
-        evidence.append("persistence capability present")
+    def S(pts, why):
+        nonlocal s_score; s_score += pts; static_ev.append(f"{why} (+{pts})")
+    def D(pts, why):
+        nonlocal d_score; d_score += pts; dynamic_ev.append(f"{why} (+{pts})")
+
+    # ---- STATIC indicators (capability, not proof of behaviour) ----
+    if "injection" in caps:          S(25, "imports process-injection APIs")
+    if "dynamic_resolution" in caps: S(15, "resolves APIs at runtime (hides intent from static analysis)")
+    if "anti_analysis" in caps:      S(15, "imports anti-analysis / anti-debug APIs")
+    if "network" in caps:            S(10, "networking capability present")
+    if "persistence" in caps:        S(10, "persistence capability present")
 
     pk = triage.get("packing", {})
-    if pk.get("likely_packed"):
-        score += 20
-        evidence.append(f"packed/obfuscated ({pk.get('packer') or 'custom'})")
+    if pk.get("likely_packed"):      S(20, f"packed/obfuscated ({pk.get('packer') or 'custom'})")
 
     if static.get("available"):
         if static.get("indirect_register_count", 0) > 0:
-            score += 10
-            evidence.append(
-                f"{static['indirect_register_count']} indirect-register control transfers (obfuscation)"
-            )
+            S(10, f"{static['indirect_register_count']} indirect-register control transfers (obfuscation)")
         s = static.get("strings", {})
         if s.get("urls") or s.get("ips"):
-            score += 10
-            evidence.append("embedded network indicators (URLs/IPs)")
-        # Packed samples reveal almost no functions statically — itself a signal.
+            S(10, "embedded network indicators (URLs/IPs) in the packed file")
         if static.get("function_count", 0) <= 2 and pk.get("likely_packed"):
-            evidence.append("static analysis blind (few functions) — payload hidden until unpacked")
+            static_ev.append("static analysis blind (few functions) — payload hidden until unpacked (+0)")
 
-    # ---- DYNAMIC evidence (the decisive part for packed malware) ----
+    # ---- DYNAMIC evidence (what it actually DID — the decisive part) ----
     dynamic = False
     vf = stg.get("verify_unpack", {}) or {}
     if vf.get("verdict") == "CONFIRMED_UNPACKED":
-        dynamic = True; score += 30
-        evidence.append("CONFIRMED self-unpacking at runtime (payload decrypted + captured at W->X flip)")
-    cls = stg.get("classification", {}) or {}
-    fams = [f["family"] for f in cls.get("families", [])]
-    if any(f in ("loader/packer", "injector", "dropper", "banker", "ransomware",
-                 "infostealer", "bot", "keylogger", "worm") for f in fams):
-        dynamic = True; score += 25
-        evidence.append(f"behavioral classification: {cls.get('primary')} "
-                        f"({', '.join(fams[:3])})")
+        dynamic = True; D(30, "CONFIRMED self-unpacking at runtime (payload captured + verified)")
+    # `dynamic` = the sample actually EXECUTED under instrumentation. Only a real
+    # API trace or a CONFIRMED unpack proves that — classification/crypto can be
+    # static-derived, so they add points but never by themselves claim "it ran".
     at = stg.get("api_trace", {}) or {}
     cnt = at.get("counts", {}) or {}
     if cnt:
         dynamic = True
-        if any("Alloc" in k for k in cnt) and any("Protect" in k for k in cnt):
-            score += 10; evidence.append("runtime: allocates memory then changes it to executable (unpacking)")
-        gp = sum(v for k, v in cnt.items() if "GetProcAddress" in k)
-        if gp >= 10:
-            score += 10; evidence.append(f"runtime: resolves {gp}+ APIs dynamically (hides imports)")
+        trace = at.get("trace", []) or []
+        # Only an ACTUAL write->execute flip is unpacking evidence. Calling VirtualAlloc and
+        # VirtualProtect is what every runtime (.NET, the CRT) does and proves nothing.
+        wx = [ev for ev in trace if "W->X" in str(((ev.get("capture") or {}).get("note") or ""))]
+        if wx:
+            D(10, f"runtime: memory made executable after being written ({len(wx)} W->X event(s)) — the unpacking moment")
+        # Resolving a LOT of APIs is normal; resolving specifically security-relevant ones by name is not.
+        resolved = sorted({str(((ev.get("capture") or {}).get("note") or "")).strip('"').lower()
+                           for ev in trace if str(ev.get("api", "")).endswith("GetProcAddress")} & SUSPICIOUS_RESOLVED)
+        if len(resolved) >= 2:
+            D(10, "runtime: resolves security-relevant APIs by name (" + ", ".join(resolved[:6]) + ")")
+    cls = stg.get("classification", {}) or {}
+    fams = [f["family"] for f in cls.get("families", [])]
+    if any(f in ("loader/packer", "injector", "dropper", "banker", "ransomware",
+                 "infostealer", "bot", "keylogger", "worm") for f in fams):
+        tag = "behavioral" if dynamic else "pattern-based"
+        D(25, f"{tag} classification: {cls.get('primary')} ({', '.join(fams[:3])})")
     cr = stg.get("crypto_recovery", {}) or {}
     if cr.get("schemes"):
-        score += 10; evidence.append(f"runtime cryptography in use ({cr['schemes'][0]['algo']})")
+        tag = "runtime cryptography" if dynamic else "crypto indicators (static)"
+        D(10, f"{tag} in use ({cr['schemes'][0]['algo']})")
 
-    score = min(score, 100)
-    if score >= 60:
+    # ---- did a payload actually get captured? (the thing that was being faked) ----
+    du = stg.get("dynamic_unpack", {}) or {}
+    dumps = ((stg.get("dumps_manifest", {}) or {}).get("dumps")) or []
+    payload_captured = bool(du.get("payload_captured")) and bool(dumps)
+    if not payload_captured:
+        caveats.append("No unpacked payload was captured/dumped — the unpacked code was NOT recovered or verified.")
+    if not dynamic:
+        caveats.append("No dynamic (runtime) analysis evidence — verdict rests on STATIC indicators only.")
+
+    # ---- combine, with the static-only cap ----
+    score = min(s_score + d_score, 100)
+    basis = "dynamic-confirmed" if dynamic else "static-only"
+    if not dynamic:
+        score = min(score, STATIC_ONLY_CAP)
+
+    if dynamic and score >= 60:
         label = "MALICIOUS"
+    elif dynamic and score >= 35:
+        label = "LIKELY MALICIOUS"
     elif score >= 30:
-        label = "LIKELY MALICIOUS" if dynamic else "SUSPICIOUS"
+        label = "SUSPICIOUS (static-only)" if not dynamic else "SUSPICIOUS"
     elif score > 0:
         label = "SUSPICIOUS"
     else:
         label = "INCONCLUSIVE"
-    return {"label": label, "confidence": score, "evidence": evidence, "dynamic": dynamic}
+
+    return {"label": label, "confidence": score, "basis": basis,
+            "dynamic": dynamic, "payload_captured": payload_captured,
+            "static_score": s_score, "dynamic_score": d_score,
+            "evidence": static_ev + dynamic_ev,          # back-compat flat list (now point-attributed)
+            "static_evidence": static_ev, "dynamic_evidence": dynamic_ev,
+            "caveats": caveats}
 
 
 def _iocs(triage: dict, static: dict) -> dict:

@@ -21,21 +21,30 @@ def _safe(name: str) -> str:
 
 
 class Case:
-    def __init__(self, sample_path: str, workroot: str = "cases"):
+    def __init__(self, sample_path: str, workroot: str = "cases", unique: bool = False, run_id: str | None = None):
         self.sample_path = str(Path(sample_path).resolve())
         data = Path(self.sample_path).read_bytes()
         self.sha256 = hashlib.sha256(data).hexdigest()
         # human-readable, self-contained per-analysis folder: <name>_<sha12>
-        self.dir = Path(workroot) / f"{_safe(Path(self.sample_path).name)}_{self.sha256[:12]}"
+        if unique:
+            # one folder per RUN: <uuid>_<malware folder name>, so repeated runs of the same sample never mix
+            import uuid
+            label = Path(self.sample_path).parent.name or Path(self.sample_path).name
+            self.run_id = run_id or str(uuid.uuid4())
+            self.dir = Path(workroot) / f"{self.run_id}_{_safe(label)}"
+        else:
+            self.dir = Path(workroot) / f"{_safe(Path(self.sample_path).name)}_{self.sha256[:12]}"
         self.dir.mkdir(parents=True, exist_ok=True)
         for sub in SUBDIRS:
             (self.dir / sub).mkdir(exist_ok=True)
         self.data = {
             "sample": self.sample_path,
             "name": Path(self.sample_path).name,
+            "dir": str(self.dir),          # case folder, so the report can verify artifacts exist
             "sha256": self.sha256,
             "size": len(data),
             "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "run_id": getattr(self, "run_id", None),
             "stages": {},     # stage name -> worker result
             "hints": [],      # accumulated dynamic hints
             "state": "new",
@@ -82,6 +91,7 @@ class Case:
         return self
 
     def save(self) -> None:
+        self.data["updated"] = time.strftime("%Y-%m-%dT%H:%M:%S")      # heartbeat: shows a run is alive/where it stopped
         (self.dir / "case.json").write_text(json.dumps(self.data, indent=2))
 
     def stage(self, name: str) -> dict:
@@ -101,3 +111,16 @@ class Case:
                 man["files"][str(p.relative_to(self.dir))] = p.stat().st_size
         (self.dir / "manifest.json").write_text(json.dumps(man, indent=2))
         return self.dir / "manifest.json"
+
+
+def find_case_json(workroot: str, sha256: str):
+    """Newest case.json under `workroot` whose sample sha256 matches (folder names no longer contain the full hash)."""
+    best = None
+    for cj in Path(workroot).glob("*/case.json"):
+        try:
+            d = json.loads(cj.read_text())
+        except Exception:
+            continue
+        if d.get("sha256") == sha256.lower() and (best is None or cj.stat().st_mtime > best.stat().st_mtime):
+            best = cj
+    return best

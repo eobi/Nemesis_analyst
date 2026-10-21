@@ -1,0 +1,36 @@
+type,value,usage,confidence,tier,sources,context
+file:imphash,7ebef1081a372c6e6f289d7c633f4f3a,block,90,observed,sample,sample (as submitted)
+file:md5,691ceb869f2c5120a139d766242ec0f4,block,90,observed,unpacked dump: api_ntwx_0x10001000.bin; unpacked dump: api_wx_0x10001000.bin,W->X region = DECRYPTED PAYLOAD (made executable)
+file:md5,6a8401448a5bd2b540850f811b20a66d,block,90,observed,sample,sample (as submitted)
+file:sha1,8192eb2fbc7c46b061e9906714eab38426782026,block,90,observed,unpacked dump: api_ntwx_0x10001000.bin; unpacked dump: api_wx_0x10001000.bin,W->X region = DECRYPTED PAYLOAD (made executable)
+file:sha1,9f01d4442c495c7128649b98201187bc0c58dedd,block,90,observed,sample,sample (as submitted)
+file:sha256,178ba564b39bd07577e974a9b677dfd86ffa1f1d0299dfd958eb883c5ef6c3e1,block,90,observed,sample,sample (as submitted)
+file:sha256,e7414cb2abfd3684187e96c4fb7b6426689e48fe96c5a520e474fe440d3491de,block,90,observed,unpacked dump: api_ntwx_0x10001000.bin; unpacked dump: api_wx_0x10001000.bin,W->X region = DECRYPTED PAYLOAD (made executable)
+file:imphash,d073d1854680ff2ddd038760f5090798,context,70,unpacked,unpacked dump: api_region1_0x1e0000_PE.bin; unpacked dump: api_region1_0x1e0000_rebuilt.exe,memory region the malware ALLOCATED (work buffer / staged data)
+file:imphash,eb76140cc31cd615e218e51dbcad0a7b,context,70,unpacked,unpacked dump: api_fullmodule_0x10000000_PE.bin; unpacked dump: api_fullmodule_0x10000000_rebuilt.exe,full module at W->X flip (-> reconstruct)
+file:md5,0a2fdfae075f7b1f75c66c361b7b3a75,context,70,unpacked,unpacked dump: api_plan_7000.bin,memory dump
+file:md5,2740f5927c507bc0df49f3a70d387699,context,70,unpacked,unpacked dump: api_region0_0x670000.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:md5,72389e9e2971cd7227dd5aa2543d6c73,context,70,unpacked,unpacked dump: api_region2_0x6f0000.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:md5,8e83c0e987ab924696ecbf13b7d380fa,context,70,unpacked,unpacked dump: api_fullmodule_0x10000000_PE.bin,full module at W->X flip (-> reconstruct)
+file:md5,9fc8d8fc35a3e4eb385f169eb16d6d16,context,70,unpacked,unpacked dump: api_fullmodule_0x10000000_rebuilt.exe,full module at W->X flip (-> reconstruct)
+file:md5,a82f9ad175ac3348c41732ab35a8ae37,context,70,unpacked,unpacked dump: api_region1_0x1e0000_rebuilt.exe,memory region the malware ALLOCATED (work buffer / staged data)
+file:md5,b8dd20ffc4818f4d84926096b7fb5a0c,context,70,unpacked,unpacked dump: api_region1_0x1e0000_PE.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha1,1c6dc0ead956ce59fe60bf4129bf28c546235e72,context,70,unpacked,unpacked dump: api_fullmodule_0x10000000_rebuilt.exe,full module at W->X flip (-> reconstruct)
+file:sha1,28c0cfc2018c56cc9f38898110c58e99e96291af,context,70,unpacked,unpacked dump: api_region1_0x1e0000_PE.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha1,4529126188c6caa7b1c19bd2dcde9569b69abd34,context,70,unpacked,unpacked dump: api_fullmodule_0x10000000_PE.bin,full module at W->X flip (-> reconstruct)
+file:sha1,8bb5b791529527b94389520275d722d59572b4be,context,70,unpacked,unpacked dump: api_region0_0x670000.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha1,983996b19b23392bdd4ad788611bca58773511a0,context,70,unpacked,unpacked dump: api_region1_0x1e0000_rebuilt.exe,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha1,f801f5fece28bb9e75527b01d536f11cbb8d9296,context,70,unpacked,unpacked dump: api_plan_7000.bin,memory dump
+file:sha1,ff0de078f2ba2b1392b6f9a01200bf1c5b1e4b3c,context,70,unpacked,unpacked dump: api_region2_0x6f0000.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha256,1049554dd71543ea961666920a5d58bc10bc354548044217c5f1556385edbebe,context,70,unpacked,unpacked dump: api_region0_0x670000.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha256,21371fb6006741a1e36c5b09a8fcdc6006f71f0dbb7c2e79e29b2db5f357293c,context,70,unpacked,unpacked dump: api_region1_0x1e0000_rebuilt.exe,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha256,21d45d1d7805dc08a41fc906b59c9bc1282dc71c55c272d512bd600374605b6c,context,70,unpacked,unpacked dump: api_region1_0x1e0000_PE.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha256,2cbbeef1249170a43854962fa5b19fba628470c70beb9ce23e15a0f05cb891f2,context,70,unpacked,unpacked dump: api_region2_0x6f0000.bin,memory region the malware ALLOCATED (work buffer / staged data)
+file:sha256,4a70fa518fa190dd0e222e8248527d4eed1d326de7fdf979abeca1ed90a0d678,context,70,unpacked,unpacked dump: api_plan_7000.bin,memory dump
+file:sha256,73e2d956e6e712eee57d85215ca81ae5fd4db2cc0802038672c08790c3491029,context,70,unpacked,unpacked dump: api_fullmodule_0x10000000_PE.bin,full module at W->X flip (-> reconstruct)
+file:sha256,bc0886d626ba6ca8c60ab997b578c66a92abae0a72fa1a17fbe4cd0570892289,context,70,unpacked,unpacked dump: api_fullmodule_0x10000000_rebuilt.exe,full module at W->X flip (-> reconstruct)
+compile-timestamp,2020-04-24 02:04:11 UTC,context,40,static,attribution,PE header timestamp (can be forged)
+version-info,"CompanyName=INCA Internet Co., Ltd.",context,40,static,attribution,possible masquerade
+version-info,InternalName=npkpdb.dll,context,40,static,attribution,possible masquerade
+version-info,OriginalFilename=npkpdb.dll,context,40,static,attribution,possible masquerade
+version-info,ProductName=nProtect KeyCrypt Program Database DLL,context,40,static,attribution,possible masquerade

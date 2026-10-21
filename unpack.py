@@ -33,6 +33,8 @@ def main():
     ap.add_argument("--detonate", action="store_true",
                     help="after unpack, fully DETONATE (FakeNet + Procmon + Regshot). "
                          "This EXECUTES the malware and dirties the VM — revert to clean-baseline after.")
+    ap.add_argument("--no-autoload", action="store_true",
+                    help="don't push + debug_init the sample; analyze whatever is already loaded in x32dbg")
     a = ap.parse_args()
 
     t = load(a.target)
@@ -66,6 +68,39 @@ def main():
     c.initialize()
 
     eng = Engine(c, log=lambda m: (print(m), rl.log("engine", m)))
+
+    # --- auto-load the sample into the debugger (no manual GUI step) ---
+    if not a.no_autoload:
+        sarch = "x64" if "64" in str(packed_triage.get("arch", "")) else "x86"
+        dbg_bits = "x64" if "64" in str((eng.call("module_get_main") or {}).get("name", "")) else "x86"
+        import time as _t
+        guest_sample = f"C:\\nemesis\\{Path(a.sample).stem}{Path(a.sample).suffix or '.exe'}"
+        want = Path(a.sample).stem.lower()[:8]
+        gL = t.guest()
+        gL.run('cmd /c "if not exist C:\\nemesis mkdir C:\\nemesis"', timeout=30)
+        if gL.push(a.sample, guest_sample):
+            eng.call("debug_stop")                      # close any current debuggee first
+            _t.sleep(1.5)
+            r = eng.call("debug_init", {"path": guest_sample})
+            ok = isinstance(r, dict) and r.get("success")
+            mg = {}
+            for _ in range(24):                         # wait for THIS module to load + settle
+                mg = eng.call("module_get_main") or {}
+                nm = (mg.get("name") or "").lower()
+                st_ = (eng.call("debug_get_state") or {}).get("state")
+                if want in nm and mg.get("entry") and st_ == "paused":
+                    break
+                _t.sleep(0.5)
+            if (eng.call("debug_get_state") or {}).get("state") == "running":
+                eng.call("debug_pause")                 # don't let it run free before we arm bps
+            print(f"[load] debug_init {guest_sample} -> success={ok}, "
+                  f"module={mg.get('name')}, entry={mg.get('entry')}")
+            if not (mg.get("entry") and want in (mg.get("name") or "").lower()):
+                print("!! debug_init did not load the expected sample. If it's 64-bit, it needs "
+                      "x64dbg (x32dbg can't load it). Aborting."); c.close(); return 3
+        else:
+            print("!! could not push the sample to the guest"); c.close(); return 3
+
     main_mod = eng.call("module_get_main")
     module = a.module or (main_mod.get("name") if isinstance(main_mod, dict) else None)
     runtime_base = main_mod.get("base") if isinstance(main_mod, dict) else None
